@@ -3,102 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>우리반 수행평가 & 시험 일정</title>
+    <title>1-4반 통합 게시판</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .tab-active { border-bottom: 4px solid #4f46e5; color: #4f46e5; font-weight: bold; }
+    </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans">
 
-    <header class="bg-indigo-600 text-white py-8 px-4 shadow-lg relative">
+    <header class="bg-indigo-600 text-white py-6 px-4 shadow-lg relative">
         <div class="max-w-4xl mx-auto text-center">
-            <h1 class="text-3xl font-bold">📅 학급 일정 공유 게시판</h1>
-            <p class="mt-2 opacity-90">수행평가와 시험 일정을 한눈에 확인하세요!</p>
+            <h1 class="text-2xl font-bold">📢 1-4반 알림센터</h1>
+            <button id="loginBtn" class="absolute top-4 right-4 text-xs opacity-60 hover:opacity-100 border border-white px-2 py-1 rounded">관리자 로그인</button>
         </div>
-        <button id="loginBtn" class="absolute top-4 right-4 text-xs opacity-50 hover:opacity-100 text-white border border-white px-2 py-1 rounded">관리자 로그인</button>
     </header>
 
-    <main class="max-w-4xl mx-auto p-4 mt-6">
+    <nav class="bg-white shadow-sm sticky top-0 z-20">
+        <div class="max-w-4xl mx-auto flex">
+            <button onclick="switchTab('exam')" id="tab-exam" class="flex-1 py-4 text-center tab-active transition">🗓️ 시험 & 수행</button>
+            <button onclick="switchTab('board')" id="tab-board" class="flex-1 py-4 text-center text-gray-500 transition">💬 자유 게시판</button>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto p-4 mt-4">
         
-        <section class="bg-white rounded-2xl shadow-md p-6 mb-8 border-l-8 border-indigo-500">
-            <h2 class="text-xl font-semibold mb-4 text-indigo-700"><i class="fas fa-thumbtack mr-2"></i>주요 시험 디데이</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-indigo-50 p-4 rounded-xl text-center">
-                    <p class="text-sm text-gray-600">중간고사까지</p>
-                    <p class="text-3xl font-black text-indigo-600" id="exam-dday">D-Day 계산 중...</p>
+        <div id="content-exam">
+            <section class="bg-white rounded-2xl shadow-md p-6 mb-6 border-l-8 border-indigo-500">
+                <h2 class="text-lg font-bold mb-4 text-gray-700">📌 주요 알림</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-indigo-50 p-4 rounded-xl">
+                        <p class="text-xs text-indigo-400 font-bold mb-1">중간고사 D-Day</p>
+                        <p id="exam-dday" class="text-2xl font-black text-indigo-600">계산 중...</p>
+                    </div>
+                    <div class="bg-red-50 p-4 rounded-xl md:col-span-2">
+                        <p class="text-xs text-red-400 font-bold mb-1">🔥 가장 가까운 수행평가</p>
+                        <p id="nearest-assessment" class="text-lg font-bold text-red-600 italic">로딩 중...</p>
+                    </div>
                 </div>
-                <div class="bg-red-50 p-4 rounded-xl text-center">
-                    <p class="text-sm text-gray-600">공지사항</p>
-                    <p id="top-notice" class="text-xl font-bold text-red-500">내용 로딩 중...</p>
-                </div>
-            </div>
-        </section>
+            </section>
 
-        <section class="mb-8">
-            <h2 class="text-2xl font-bold mb-4 flex items-center">
-                <span class="bg-yellow-400 w-2 h-8 mr-3 rounded-full"></span>
-                수행평가 일정
-            </h2>
-            <div class="overflow-hidden rounded-xl shadow-md border border-gray-200 bg-white">
-                <table class="w-full text-left">
-                    <thead class="bg-gray-100 border-b border-gray-200 text-gray-600">
-                        <tr>
-                            <th class="p-4">과목</th>
-                            <th class="p-4">내용</th>
-                            <th class="p-4">마감기한</th>
-                        </tr>
-                    </thead>
-                    <tbody id="assessment-list" class="divide-y divide-gray-100">
-                        </tbody>
-                </table>
-            </div>
-        </section>
+            <section class="mb-8">
+                <h2 class="text-xl font-bold mb-4 flex items-center"><span class="bg-yellow-400 w-1.5 h-6 mr-2 rounded-full"></span>수행평가 일정</h2>
+                <div class="overflow-x-auto rounded-xl shadow-sm border bg-white">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50 text-gray-500 text-sm">
+                            <tr><th class="p-4">과목</th><th class="p-4">내용</th><th class="p-4">마감</th></tr>
+                        </thead>
+                        <tbody id="assessment-list" class="divide-y text-sm"></tbody>
+                    </table>
+                </div>
+            </section>
 
-        <section class="mb-8">
-            <h2 class="text-2xl font-bold mb-4 flex items-center">
-                <span class="bg-green-400 w-2 h-8 mr-3 rounded-full"></span>
-                시험 범위 공지
-            </h2>
-            <div id="range-cards" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                </div>
-        </section>
+            <section>
+                <h2 class="text-xl font-bold mb-4 flex items-center"><span class="bg-green-400 w-1.5 h-6 mr-2 rounded-full"></span>시험 범위</h2>
+                <div id="range-cards" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+            </section>
+        </div>
 
-        <section id="admin-panel" class="hidden mt-12 p-6 bg-slate-800 rounded-3xl text-white shadow-2xl">
-            <h2 class="text-xl font-bold mb-4 text-yellow-400"><i class="fas fa-lock-open mr-2"></i>관리자 편집 모드</h2>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm mb-1 text-gray-300">시험 날짜 설정 (예: 2026-04-28)</label>
-                    <input type="date" id="input-date" class="w-full p-2 rounded bg-slate-700 text-white border-none focus:ring-2 focus:ring-yellow-400">
+        <div id="content-board" class="hidden">
+            <section class="bg-white rounded-2xl shadow-md p-6">
+                <h2 class="text-xl font-bold mb-4">💬 우리반 한마디</h2>
+                <div id="post-input-section" class="hidden mb-6">
+                    <textarea id="post-text" class="w-full p-4 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" rows="2" placeholder="친구들에게 남길 말을 적어보세요!"></textarea>
+                    <button onclick="addPost()" class="w-full mt-2 bg-indigo-600 text-white font-bold py-3 rounded-xl">게시하기</button>
                 </div>
-                <div>
-                    <label class="block text-sm mb-1 text-gray-300">중요 공지 (디데이 우측 내용)</label>
-                    <input type="text" id="input-notice" class="w-full p-2 rounded bg-slate-700 text-white border-none focus:ring-2 focus:ring-yellow-400">
+                <div id="post-login-msg" class="text-center py-4 text-gray-400 text-sm border-2 border-dashed rounded-xl mb-6">
+                    로그인하면 글을 남길 수 있습니다.
                 </div>
-                <div>
-                    <label class="block text-sm mb-1 text-gray-300">시험 범위 (과목:범위 / 과목:범위 형태로 입력)</label>
-                    <textarea id="input-ranges" class="w-full p-2 rounded bg-slate-700 text-white h-24 border-none focus:ring-2 focus:ring-yellow-400" placeholder="과학:1단원~3단원&#10;사회:2단원 전범위"></textarea>
-                </div>
-                <div>
-                    <label class="block text-sm mb-1 text-gray-300">수행평가 목록 (과목|내용|날짜 순으로 한줄씩 입력)</label>
-                    <textarea id="input-assessments" class="w-full p-2 rounded bg-slate-700 text-white h-32 border-none focus:ring-2 focus:ring-yellow-400" placeholder="수학|포트폴리오 제출|04.15(수)&#10;국어|독서 감상문 발표|D-3 🔥"></textarea>
-                </div>
-                <button onclick="saveData()" class="w-full bg-yellow-400 text-slate-900 font-black py-3 rounded-xl hover:bg-yellow-300 transition">데이터 업데이트 (전체 반영)</button>
+                <div id="post-list" class="space-y-4"></div>
+            </section>
+        </div>
+
+        <section id="admin-panel" class="hidden mt-10 p-6 bg-gray-900 rounded-3xl text-white">
+            <h2 class="text-lg font-bold mb-4 text-yellow-400">🛠️ 관리자 데이터 수정</h2>
+            <div class="grid grid-cols-1 gap-4 text-sm">
+                <input type="date" id="input-date" class="bg-gray-800 p-2 rounded border-none">
+                <textarea id="input-assessments" class="bg-gray-800 p-2 rounded h-24" placeholder="과목|내용|날짜 (한 줄에 하나씩)"></textarea>
+                <textarea id="input-ranges" class="bg-gray-800 p-2 rounded h-24" placeholder="과목:상세내용 (한 줄에 하나씩)"></textarea>
+                <button onclick="saveData()" class="bg-yellow-500 text-black font-bold py-2 rounded">서버에 저장하기</button>
             </div>
         </section>
 
     </main>
 
-    <footer class="mt-12 py-8 bg-gray-100 text-center text-gray-500 text-sm">
-        <p>© 2024 우리반 정보 공유 페이지</p>
-        <p id="last-update" class="mt-1 text-xs text-gray-400 italic">최종 업데이트 확인 중...</p>
-    </footer>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, addDoc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // 1. Firebase 설정 (도현님의 기존 설정 사용)
         const firebaseConfig = {
             apiKey: "AIzaSyDKbxqZBW6NovbiJAFJGyZIQZfYIxGvbN8",
             authDomain: "byhs1-4.firebaseapp.com",
@@ -113,103 +106,95 @@
         const db = getFirestore();
         const provider = new GoogleAuthProvider();
 
-        // ⭐ 2. 관리자 이메일 설정 (도현님의 이메일로 바꾸세요!)
-        const ADMIN_EMAIL = "kr.craft1016@gmail.com"; 
-
-        // 데이터베이스 문서 참조
+        const ADMIN_EMAIL = "kdh1o.edu@gmail.com"; // 도현님 이메일
         const dataDoc = doc(db, "classData", "main");
 
-        // 3. 실시간 데이터 렌더링
-        onSnapshot(dataDoc, (snapshot) => {
-            if (snapshot.exists()) {
-                const data = snapshot.data();
-                renderAll(data);
-                // 편집창에 기존값 채워두기
-                document.getElementById('input-date').value = data.examDate;
-                document.getElementById('input-notice').value = data.topNotice;
-                document.getElementById('input-ranges').value = data.rawRanges;
-                document.getElementById('input-assessments').value = data.rawAssessments;
-                document.getElementById('last-update').innerText = `최종 수정: ${data.lastUpdated} (${data.updatedBy})`;
-            }
-        });
+        // 탭 전환 로직
+        window.switchTab = (tab) => {
+            document.getElementById('content-exam').classList.toggle('hidden', tab !== 'exam');
+            document.getElementById('content-board').classList.toggle('hidden', tab !== 'board');
+            document.getElementById('tab-exam').className = tab === 'exam' ? 'flex-1 py-4 text-center tab-active' : 'flex-1 py-4 text-center text-gray-500';
+            document.getElementById('tab-board').className = tab === 'board' ? 'flex-1 py-4 text-center tab-active' : 'flex-1 py-4 text-center text-gray-500';
+        };
 
-        function renderAll(data) {
-            // 디데이 계산
-            const examDate = new Date(data.examDate);
-            const today = new Date();
-            const diff = examDate - today;
-            const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-            document.getElementById('exam-dday').innerText = days > 0 ? `D-${days}` : (days === 0 ? "D-Day ✨" : "종료");
-            
-            // 공지사항
-            document.getElementById('top-notice').innerText = data.topNotice;
+        // 실시간 데이터 감시 (시험/수행)
+        onSnapshot(dataDoc, (snap) => {
+            if (snap.exists()) {
+                const data = snap.data();
+                // 디데이
+                const diff = new Date(data.examDate) - new Date();
+                const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                document.getElementById('exam-dday').innerText = days > 0 ? `D-${days}` : (days === 0 ? "Today" : "종료");
 
-            // 수행평가 리스트
-            const listBody = document.getElementById('assessment-list');
-            listBody.innerHTML = "";
-            const rows = data.rawAssessments.split('\n');
-            rows.forEach(row => {
-                const [subject, content, date] = row.split('|');
-                if(subject) {
-                    listBody.innerHTML += `
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="p-4 font-bold text-indigo-600">${subject}</td>
-                            <td class="p-4 text-sm text-gray-600">${content}</td>
-                            <td class="p-4"><span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-bold">${date}</span></td>
-                        </tr>
-                    `;
-                }
-            });
-
-            // 시험 범위 카드
-            const cardContainer = document.getElementById('range-cards');
-            cardContainer.innerHTML = "";
-            const ranges = data.rawRanges.split('\n');
-            ranges.forEach(line => {
-                const [title, desc] = line.split(':');
-                if(title) {
-                    cardContainer.innerHTML += `
-                        <div class="bg-white p-5 rounded-xl shadow border border-gray-100">
-                            <h3 class="font-bold text-lg mb-2 text-green-700">${title}</h3>
-                            <p class="text-gray-600 text-sm leading-relaxed">${desc}</p>
-                        </div>
-                    `;
-                }
-            });
-        }
-
-        // 4. 권한 체크 및 로그인
-        onAuthStateChanged(auth, (user) => {
-            const adminPanel = document.getElementById('admin-panel');
-            const loginBtn = document.getElementById('loginBtn');
-            if (user && user.email === ADMIN_EMAIL) {
-                adminPanel.classList.remove('hidden');
-                loginBtn.innerText = "로그아웃";
-                loginBtn.onclick = () => auth.signOut();
-            } else {
-                adminPanel.classList.add('hidden');
-                loginBtn.innerText = "관리자 로그인";
-                loginBtn.onclick = () => signInWithPopup(auth, provider);
-            }
-        });
-
-        // 5. 데이터 저장 함수
-        window.saveData = async () => {
-            if (confirm("내용을 업데이트 하시겠습니까?")) {
-                try {
-                    await setDoc(dataDoc, {
-                        examDate: document.getElementById('input-date').value,
-                        topNotice: document.getElementById('input-notice').value,
-                        rawRanges: document.getElementById('input-ranges').value,
-                        rawAssessments: document.getElementById('input-assessments').value,
-                        lastUpdated: new Date().toLocaleString(),
-                        updatedBy: auth.currentUser.displayName
+                // 수행평가 리스트 & 가장 가까운 수행 찾기
+                const listBody = document.getElementById('assessment-list');
+                listBody.innerHTML = "";
+                const rows = data.rawAssessments.split('\n').filter(r => r.includes('|'));
+                
+                if(rows.length > 0) {
+                    document.getElementById('nearest-assessment').innerText = rows[0].replace('|', ' - ').split('|')[0] + " (" + rows[0].split('|')[2] + ")";
+                    rows.forEach(row => {
+                        const [sub, con, dat] = row.split('|');
+                        listBody.innerHTML += `<tr><td class="p-4 font-bold text-indigo-600">${sub}</td><td class="p-4 text-gray-500">${con}</td><td class="p-4 text-xs font-bold text-blue-500">${dat}</td></tr>`;
                     });
-                    alert("성공적으로 저장되었습니다!");
-                } catch (e) {
-                    alert("저장 실패: 권한이 없거나 설정을 확인하세요.");
                 }
+
+                // 시험 범위
+                const cardCont = document.getElementById('range-cards');
+                cardCont.innerHTML = "";
+                data.rawRanges.split('\n').forEach(line => {
+                    if(line.includes(':')) {
+                        const [t, d] = line.split(':');
+                        cardCont.innerHTML += `<div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm"><h3 class="font-bold text-green-700 mb-1">${t}</h3><p class="text-xs text-gray-500">${d}</p></div>`;
+                    }
+                });
+
+                // 관리자 창에 기존 데이터 세팅
+                document.getElementById('input-date').value = data.examDate;
+                document.getElementById('input-assessments').value = data.rawAssessments;
+                document.getElementById('input-ranges').value = data.rawRanges;
             }
+        });
+
+        // 자유 게시판 실시간 로딩
+        const q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(20));
+        onSnapshot(q, (snap) => {
+            const list = document.getElementById('post-list');
+            list.innerHTML = "";
+            snap.forEach(doc => {
+                const p = doc.data();
+                list.innerHTML += `<div class="bg-gray-50 p-4 rounded-xl"><div class="flex justify-between text-xs mb-1"><span class="font-bold text-indigo-600">${p.user}</span><span class="text-gray-400">${p.createdAt?.toDate().toLocaleString().slice(5, 16)}</span></div><p class="text-sm">${p.text}</p></div>`;
+            });
+        });
+
+        // 글쓰기 함수
+        window.addPost = async () => {
+            const text = document.getElementById('post-text').value;
+            if(!text) return;
+            await addDoc(collection(db, "posts"), { text, user: auth.currentUser.displayName, createdAt: new Date() });
+            document.getElementById('post-text').value = "";
+        };
+
+        // 로그인 감지
+        onAuthStateChanged(auth, (user) => {
+            const isAdmin = user && user.email === ADMIN_EMAIL;
+            document.getElementById('admin-panel').classList.toggle('hidden', !isAdmin);
+            document.getElementById('post-input-section').classList.toggle('hidden', !user);
+            document.getElementById('post-login-msg').classList.toggle('hidden', !!user);
+            document.getElementById('loginBtn').innerText = user ? "로그아웃" : "관리자 로그인";
+            document.getElementById('loginBtn').onclick = () => user ? auth.signOut() : signInWithPopup(auth, provider);
+        });
+
+        // 관리자 데이터 저장
+        window.saveData = async () => {
+            await setDoc(dataDoc, {
+                examDate: document.getElementById('input-date').value,
+                rawAssessments: document.getElementById('input-assessments').value,
+                rawRanges: document.getElementById('input-ranges').value,
+                lastUpdated: new Date().toLocaleString(),
+                updatedBy: auth.currentUser.displayName
+            });
+            alert("업데이트 완료!");
         };
     </script>
 </body>

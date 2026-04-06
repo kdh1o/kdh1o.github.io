@@ -3,109 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>우리반 수행평가 & 시험 일정</title>
+    <title>우리반 게시판</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body class="bg-gray-50 text-gray-800 font-sans">
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    <header class="bg-indigo-600 text-white py-8 px-4 shadow-lg">
-        <div class="max-w-4xl mx-auto text-center">
-            <h1 class="text-3xl font-bold">📅 학급 일정 공유 게시판</h1>
-            <p class="mt-2 opacity-90">수행평가와 시험 일정을 한눈에 확인하세요!</p>
-        </div>
-    </header>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDKbxqZBW6NovbiJAFJGyZIQZfYIxGvbN8",
+            authDomain: "byhs1-4.firebaseapp.com",
+            projectId: "byhs1-4",
+            storageBucket: "byhs1-4.firebasestorage.app",
+            messagingSenderId: "734684323543",
+            appId: "1:734684323543:web:fb7bd8c10e6cfcacabda92"
+        };
 
-    <main class="max-w-4xl mx-auto p-4 mt-6">
-        
-        <section class="bg-white rounded-2xl shadow-md p-6 mb-8 border-l-8 border-indigo-500">
-            <h2 class="text-xl font-semibold mb-4 text-indigo-700"><i class="fas fa-thumbtack mr-2"></i>주요 시험 디데이</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-indigo-50 p-4 rounded-xl text-center">
-                    <p class="text-sm text-gray-600">중간고사까지</p>
-                    <p class="text-3xl font-black text-indigo-600" id="exam-dday">D-Day 계산 중...</p>
-                </div>
-                <div class="bg-red-50 p-4 rounded-xl text-center">
-                    <p class="text-sm text-gray-600">가장 빠른 수행평가</p>
-                    <p class="text-3xl font-black text-red-500">D-3 (국어)</p>
-                </div>
-            </div>
-        </section>
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const db = getFirestore();
+        const provider = new GoogleAuthProvider();
 
-        <section class="mb-8">
-            <h2 class="text-2xl font-bold mb-4 flex items-center">
-                <span class="bg-yellow-400 w-2 h-8 mr-3 rounded-full"></span>
-                수행평가 일정
-            </h2>
-            <div class="overflow-hidden rounded-xl shadow-md border border-gray-200">
-                <table class="w-full text-left bg-white">
-                    <thead class="bg-gray-100 border-b border-gray-200 text-gray-600">
-                        <tr>
-                            <th class="p-4">과목</th>
-                            <th class="p-4">내용</th>
-                            <th class="p-4">마감기한</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="p-4 font-bold text-indigo-600">수학</td>
-                            <td class="p-4 text-sm">문제 풀이 및 포트폴리오 제출 (교과서 p.120)</td>
-                            <td class="p-4"><span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-bold">04.15(수)</span></td>
-                        </tr>
-                        <tr class="hover:bg-gray-50 transition text-red-600 bg-red-50">
-                            <td class="p-4 font-bold">국어</td>
-                            <td class="p-4 text-sm">독서 감상문 발표 (5분 분량)</td>
-                            <td class="p-4"><span class="bg-red-200 text-red-800 px-2 py-1 rounded text-xs font-bold font-bold">D-3 🔥</span></td>
-                        </tr>
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="p-4 font-bold text-indigo-600">영어</td>
-                            <td class="p-4 text-sm">단어 시험 (Unit 3-4)</td>
-                            <td class="p-4"><span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-bold">04.20(월)</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+        onAuthStateChanged(auth, (user) => {
+            const loginBtn = document.getElementById('loginBtn');
+            const writeSection = document.getElementById('writeSection');
+            if (user) {
+                loginBtn.innerText = `${user.displayName} (로그아웃)`;
+                writeSection.classList.remove('hidden');
+                loginBtn.onclick = () => signOut(auth);
+            } else {
+                loginBtn.innerText = "구글 로그인";
+                writeSection.classList.add('hidden');
+                loginBtn.onclick = () => signInWithPopup(auth, provider);
+            }
+        });
 
-        <section>
-            <h2 class="text-2xl font-bold mb-4 flex items-center">
-                <span class="bg-green-400 w-2 h-8 mr-3 rounded-full"></span>
-                시험 범위 공지
-            </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-white p-5 rounded-xl shadow border border-gray-100">
-                    <h3 class="font-bold text-lg mb-2 text-green-700">과학</h3>
-                    <p class="text-gray-600 text-sm leading-relaxed">1단원 물리 변화 ~ 3단원 생명 활동 (교과서 p.12-88 / 학습지 1~12번)</p>
-                </div>
-                <div class="bg-white p-5 rounded-xl shadow border border-gray-100">
-                    <h3 class="font-bold text-lg mb-2 text-green-700">사회</h3>
-                    <p class="text-gray-600 text-sm leading-relaxed">2단원 헌법과 국가 기관 전 범위 (PPT 자료 위주로 공부할 것)</p>
-                </div>
-            </div>
-        </section>
+        window.savePost = async () => {
+            const content = document.getElementById('postContent').value;
+            if (!content) return alert("내용을 입력하세요!");
 
-    </main>
+            try {
+                await addDoc(collection(db, "posts"), {
+                    text: content,
+                    createdAt: new Date(),
+                    user: auth.currentUser.displayName
+                });
+                document.getElementById('postContent').value = "";
+            } catch (e) {
+                alert("오류 발생: " + e.message);
+            }
+        };
 
-    <footer class="mt-12 py-8 bg-gray-100 text-center text-gray-500 text-sm">
-        <p>© 2024 우리반 정보 공유 페이지</p>
-        <p class="mt-1 text-xs">수정하려면 index.html 파일을 직접 수정해 주세요.</p>
-    </footer>
-
-    <script>
-        // 중간고사 디데이 설정 (연도, 월(0부터 시작), 일)
-        const examDate = new Date(2026, 3, 28); // 예: 2026년 4월 28일 (3은 4월을 의미)
-        
-        function updateDday() {
-            const today = new Date();
-            const diff = examDate - today;
-            const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-            
-            const display = document.getElementById('exam-dday');
-            if (days > 0) display.innerText = `D-${days}`;
-            else if (days === 0) display.innerText = `D-Day ✨`;
-            else display.innerText = `종료`;
-        }
-        updateDday();
+        const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+        onSnapshot(q, (snapshot) => {
+            const list = document.getElementById('postList');
+            list.innerHTML = "";
+            snapshot.forEach((doc) => {
+                const post = doc.data();
+                list.innerHTML += `
+                    <div class="bg-white p-5 rounded-2xl shadow-sm mb-4 border border-gray-100">
+                        <div class="flex justify-between mb-2">
+                            <span class="font-bold text-indigo-600 text-sm">${post.user}</span>
+                        </div>
+                        <p class="text-gray-800">${post.text}</p>
+                    </div>
+                `;
+            });
+        });
     </script>
+</head>
+<body class="bg-slate-50">
+    <nav class="bg-white border-b p-4 sticky top-0 z-10 shadow-sm">
+        <div class="max-w-xl mx-auto flex justify-between items-center">
+            <h1 class="font-black text-indigo-600 text-xl">BYHS 1-4 📌</h1>
+            <button id="loginBtn" class="text-sm font-bold bg-indigo-50 px-4 py-2 rounded-lg text-indigo-600"></button>
+        </div>
+    </nav>
+    <main class="max-w-xl mx-auto p-4">
+        <div id="writeSection" class="hidden mb-8">
+            <textarea id="postContent" class="w-full p-4 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none resize-none" rows="3" placeholder="소식을 전해보세요..."></textarea>
+            <button onclick="savePost()" class="w-full mt-2 bg-indigo-600 text-white font-bold py-3 rounded-2xl hover:bg-indigo-700 transition">게시물 올리기</button>
+        </div>
+        <div id="postList"></div>
+    </main>
 </body>
 </html>

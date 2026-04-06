@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BYHS 1-4 ALL-IN-ONE</title>
+    <title>BYHS 1-4</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -23,8 +23,8 @@
 
     <nav class="w-full bg-white/80 backdrop-blur-md flex border-b sticky top-0 z-20 shadow-sm">
         <div class="max-w-4xl mx-auto w-full flex">
-            <button id="tab-exam" class="flex-1 py-4 font-bold tab-active transition-all">🗓️ 학업 일정</button>
-            <button id="tab-board" class="flex-1 py-4 font-bold text-gray-400 transition-all">💬 자유 게시판</button>
+            <button id="tab-exam" class="flex-1 py-4 font-bold tab-active transition-all">🗓️ 시험 & 수행</button>
+            <button id="tab-board" class="flex-1 py-4 font-bold text-gray-400 transition-all">💬 게시판</button>
         </div>
     </nav>
 
@@ -74,10 +74,10 @@
 
         <div id="content-board" class="hidden">
             <section class="card">
-                <h2 class="title mb-4">💬 우리들의 공간</h2>
+                <h2 class="title mb-4">💬 게시판</h2>
                 <div id="post-input-section" class="hidden mb-6">
-                    <textarea id="post-text" class="input" rows="3" placeholder="서로를 배려하는 따뜻한 한마디를 남겨주세요."></textarea>
-                    <button id="addPostBtn" class="btn-primary mt-3 shadow-lg">글 남기기</button>
+                    <textarea id="post-text" class="input" rows="3" placeholder="작성..."></textarea>
+                    <button id="addPostBtn" class="btn-primary mt-3 shadow-lg">작성</button>
                 </div>
                 <div id="post-login-msg" class="text-center py-10 text-gray-400 text-sm border-2 border-dashed border-gray-200 rounded-2xl mb-6">로그인이 필요한 서비스입니다.</div>
                 <div id="post-list" class="space-y-4"></div>

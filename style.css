@@ -1,35 +1,83 @@
-/* 탭 활성화 */
-.tab-active { 
-    border-bottom: 4px solid #1e293b; 
-    color: #1e293b; 
-    font-weight: bold; 
+body {
+    font-family: 'Pretendard', sans-serif;
 }
 
-/* 자동 링크 */
-.auto-link { 
-    color: #2563eb; 
-    text-decoration: underline; 
-    font-weight: 500; 
+/* 카드 */
+.card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: 0.25s;
 }
 
-/* 삭제 버튼 */
-.delete-btn { 
-    color: #ef4444; 
-    font-size: 0.75rem; 
-    font-weight: bold; 
-    margin-left: 10px; 
-    cursor: pointer; 
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.08);
 }
 
-/* 모바일 깨짐 방지 및 공백 유지 */
-body { margin: 0; padding: 0; overflow-x: hidden; }
-.whitespace-pre-wrap { white-space: pre-wrap; word-break: break-all; }
-.hidden { display: none; }
+/* 제목 */
+.title {
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
 
-/* 게시판 카드 스타일 */
-.post-card {
-    background-color: #f9fafb;
+.section-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+}
+
+/* 박스 */
+.box {
     padding: 1rem;
     border-radius: 0.75rem;
-    border: 1px solid #f3f4f6;
+}
+
+/* 텍스트 */
+.label {
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+.big {
+    font-size: 1.8rem;
+    font-weight: 800;
+}
+
+/* 입력창 */
+.input {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid #ddd;
+    margin-bottom: 0.5rem;
+}
+
+/* 버튼 */
+.btn-primary {
+    width: 100%;
+    background: #4f46e5;
+    color: white;
+    padding: 0.8rem;
+    border-radius: 0.75rem;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.btn-primary:hover {
+    background: #4338ca;
+    transform: scale(1.03);
+}
+
+/* 탭 */
+.tab-active {
+    border-bottom: 3px solid #1e293b;
+    font-weight: bold;
+}
+
+/* 링크 */
+.auto-link {
+    color: #2563eb;
+    text-decoration: underline;
 }

@@ -1,39 +1,66 @@
+/* 폰트 적용 (도현님 추가 스타일) */
 body {
     font-family: 'Pretendard', sans-serif;
+    margin: 0; 
+    padding: 0; 
+    overflow-x: hidden; /* 모바일 가로 스크롤 방지 */
 }
 
+/* 카드 UI (도현님 추가 스타일) */
 .card {
     background: white;
     padding: 1.5rem;
     border-radius: 1rem;
     margin-bottom: 1rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     transition: 0.25s;
 }
 
 .card:hover {
     transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
 .title {
-    font-weight: bold;
+    font-weight: 800;
+    font-size: 1.125rem;
     margin-bottom: 10px;
 }
 
 .input {
     width: 100%;
-    padding: 10px;
+    padding: 15px;
     border-radius: 10px;
-    border: 1px solid #ddd;
+    border: 1px solid #e5e7eb;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.input:focus {
+    border-color: #4f46e5;
 }
 
 .btn-primary {
     width: 100%;
     background: #4f46e5;
     color: white;
-    padding: 10px;
+    font-weight: bold;
+    padding: 12px;
     border-radius: 10px;
+    transition: background-color 0.2s;
 }
 
-.tab-active {
-    border-bottom: 3px solid black;
+.btn-primary:hover {
+    background: #4338ca;
 }
+
+/* 탭 활성화 바 */
+.tab-active {
+    border-bottom: 3px solid #1e293b;
+    color: #1e293b;
+}
+
+/* 유틸리티 */
+.auto-link { color: #4f46e5; text-decoration: underline; font-weight: 600; }
+.delete-btn { cursor: pointer; }
+.hidden { display: none !important; }

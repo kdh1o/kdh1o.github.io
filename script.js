@@ -1,157 +1,154 @@
+// Firebase import
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, doc, setDoc, onSnapshot, collection, addDoc, query, orderBy, limit, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+// Firebase 설정
 const firebaseConfig = {
-    apiKey: "AIzaSyDKbxqZBW6NovbiJAFJGyZIQZfYIxGvbN8",
-    authDomain: "byhs1-4.firebaseapp.com",
-    projectId: "byhs1-4",
-    storageBucket: "byhs1-4.firebasestorage.app",
-    messagingSenderId: "734684323543",
-    appId: "1:734684323543:web:fb7bd8c10e6cfcacabda92"
+    apiKey: "YOUR_KEY",
+    authDomain: "YOUR_DOMAIN",
+    projectId: "YOUR_ID",
 };
 
+// 초기화
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getFirestore();
 const provider = new GoogleAuthProvider();
 
-const ADMIN_EMAIL = "kr.craft1016@gmail.com"; 
+// 관리자
+const ADMIN_EMAIL = "kr.craft1016@gmail.com";
+
+// 문서
 const dataDoc = doc(db, "classData", "main");
 
+// 링크 변환
 const linkify = (text) => {
     if (!text) return "";
-    const urlPattern = /(https?:\/\/[^\s]+)/g;
-    return text.replace(urlPattern, '<a href="$1" target="_blank" class="auto-link">$1</a>');
+    return text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="auto-link">$1</a>');
 };
 
+// 탭 전환
 const switchTab = (tab) => {
     document.getElementById('content-exam').classList.toggle('hidden', tab !== 'exam');
     document.getElementById('content-board').classList.toggle('hidden', tab !== 'board');
-    document.getElementById('tab-exam').className = tab === 'exam' ? 'flex-1 py-4 text-center tab-active' : 'flex-1 py-4 text-center text-gray-500';
-    document.getElementById('tab-board').className = tab === 'board' ? 'flex-1 py-4 text-center tab-active' : 'flex-1 py-4 text-center text-gray-500';
 };
+
 document.getElementById('tab-exam').onclick = () => switchTab('exam');
 document.getElementById('tab-board').onclick = () => switchTab('board');
 
-// 데이터 실시간 감시 및 디데이 계산
+// 데이터 실시간
 onSnapshot(dataDoc, (snap) => {
-    if (snap.exists()) {
-        const data = snap.data();
-        
-        // 1. 시험 D-Day
-        const examDiff = new Date(data.examDate) - new Date();
-        const examDays = Math.ceil(examDiff / (1000 * 60 * 60 * 24));
-        document.getElementById('exam-dday').innerText = examDays > 0 ? `D-${examDays}` : (examDays === 0 ? "D-Day" : "종료");
+    if (!snap.exists()) return;
 
-        // 2. 공지사항
-        document.getElementById('notice-content').innerHTML = linkify(data.notice || "공지가 없습니다.");
+    const data = snap.data();
 
-        // 3. 부리미어 리그 디데이 (강력한 정규표현식 적용)
-        const plRaw = data.plSchedule || "";
-        const plEl = document.getElementById('pl-content');
-        // 숫자.숫자 공백 숫자:숫자 형태를 무조건 찾아냄
-        const timeRegex = /(\d{1,2})[./](\d{1,2})\s+(\d{1,2}):(\d{2})/;
-        const plMatch = plRaw.match(timeRegex);
+    // D-Day
+    const diff = new Date(data.examDate) - new Date();
+    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    document.getElementById('exam-dday').innerText =
+        days > 0 ? `D-${days}` : (days === 0 ? "D-Day" : "종료");
 
-        if (plMatch) {
-            const [_, mon, day, hr, min] = plMatch;
-            const now = new Date();
-            const gameDate = new Date(now.getFullYear(), parseInt(mon) - 1, parseInt(day), parseInt(hr), parseInt(min));
-            const tDiff = gameDate - now;
+    // 공지
+    document.getElementById('notice-content').innerHTML =
+        linkify(data.notice || "공지 없음");
 
-            if (tDiff > 0) {
-                const d = Math.floor(tDiff / (1000 * 60 * 60 * 24));
-                const h = Math.floor((tDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const m = Math.floor((tDiff % (1000 * 60 * 60)) / (1000 * 60));
-                const ddayStr = d > 0 ? `D-${d} ${h}시간 전` : `${h}시간 ${m}분 전`;
-                plEl.innerHTML = `<div class="mb-2"><span class="bg-cyan-100 text-cyan-700 text-xs font-bold px-2 py-1 rounded shadow-sm">${ddayStr}</span></div><div class="text-base font-medium">${linkify(plRaw)}</div>`;
-            } else {
-                plEl.innerHTML = `<div class="mb-1"><span class="bg-gray-200 text-gray-500 text-xs px-2 py-1 rounded">경기 종료</span></div><div class="text-gray-500">${linkify(plRaw)}</div>`;
-            }
-        } else {
-            plEl.innerHTML = linkify(plRaw || "일정이 없습니다.");
-        }
+    // 수행평가
+    const list = document.getElementById('assessment-list');
+    list.innerHTML = "";
 
-        // 4. 수행평가
-        const listBody = document.getElementById('assessment-list');
-        listBody.innerHTML = "";
-        const rows = (data.rawAssessments || "").split('\n').filter(r => r.includes('|'));
-        if(rows.length > 0) {
-            const firstRow = rows[0].split('|');
-            document.getElementById('nearest-assessment').innerHTML = `${firstRow[0]} - ${linkify(firstRow[1])}`;
-            rows.forEach(r => {
-                const [s, c, d] = r.split('|');
-                listBody.innerHTML += `<tr><td class="p-4 font-bold text-indigo-600">${s}</td><td class="p-4">${linkify(c)}</td><td class="p-4 text-blue-500 font-bold">${d}</td></tr>`;
-            });
-        }
+    const rows = (data.rawAssessments || "").split('\n').filter(r => r.includes('|'));
 
-        // 5. 시험 범위
-        const rangeCont = document.getElementById('range-cards');
-        rangeCont.innerHTML = "";
-        (data.rawRanges || "").split('\n').forEach(l => {
-            if(l.includes(':')) {
-                const [t, d] = l.split(':');
-                rangeCont.innerHTML += `<div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm"><h3 class="font-bold text-green-700 text-xl mb-1">${t}</h3><p class="text-gray-600 text-lg">${linkify(d)}</p></div>`;
-            }
+    rows.forEach(r => {
+        const [s, c, d] = r.split('|');
+        list.innerHTML += `
+        <tr>
+            <td class="p-3 font-bold text-indigo-600">${s}</td>
+            <td class="p-3">${linkify(c)}</td>
+            <td class="p-3 text-blue-500 font-bold">${d}</td>
+        </tr>`;
+    });
+
+    if (rows.length > 0) {
+        const [s, c] = rows[0].split('|');
+        document.getElementById('nearest-assessment').innerHTML =
+            `${s} - ${linkify(c)}`;
+    }
+
+    // 시험 범위
+    const range = document.getElementById('range-cards');
+    if (range) {
+        range.innerHTML = "";
+
+        (data.rawRanges || "").split('\n').forEach(line => {
+            if (!line.includes(':')) return;
+            const [t, d] = line.split(':');
+
+            range.innerHTML += `
+            <div class="card">
+                <h3 class="font-bold text-green-600">${t}</h3>
+                <p>${linkify(d)}</p>
+            </div>`;
         });
-
-        // 관리자 인풋 동기화
-        document.getElementById('input-date').value = data.examDate || "";
-        document.getElementById('input-assessments').value = data.rawAssessments || "";
-        document.getElementById('input-ranges').value = data.rawRanges || "";
-        document.getElementById('input-notice').value = data.notice || "";
-        document.getElementById('input-pl').value = data.plSchedule || "";
     }
 });
 
-// 게시판 실시간 연동
+// 게시판
 const q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(40));
+
 onSnapshot(q, (snap) => {
     const list = document.getElementById('post-list');
     list.innerHTML = "";
-    const isAdmin = auth.currentUser && auth.currentUser.email === ADMIN_EMAIL;
+
     snap.forEach(docSnap => {
         const p = docSnap.data();
-        const postId = docSnap.id;
-        const postEl = document.createElement('div');
-        postEl.className = "bg-gray-50 p-4 rounded-xl border border-gray-100 shadow-sm";
-        let delBtn = isAdmin ? `<button class="delete-btn text-red-500 text-xs ml-2 font-bold" onclick="window.deletePost('${postId}')">삭제</button>` : "";
-        postEl.innerHTML = `<div class="flex justify-between text-xs mb-1"><div><span class="font-bold text-indigo-600">${p.user}</span>${delBtn}</div><span class="text-gray-400">${p.createdAt?.toDate().toLocaleString().slice(5, 16)}</span></div><p class="text-sm text-gray-700">${linkify(p.text)}</p>`;
-        list.appendChild(postEl);
+
+        const el = document.createElement('div');
+        el.className = "card";
+
+        el.innerHTML = `
+            <div class="text-xs text-gray-400 mb-1">
+                ${p.user} · ${p.createdAt?.toDate().toLocaleString()}
+            </div>
+            <div>${linkify(p.text)}</div>
+        `;
+
+        list.appendChild(el);
     });
 });
 
-window.deletePost = async (id) => {
-    if(confirm("삭제하시겠습니까?")) await deleteDoc(doc(db, "posts", id));
-};
-
+// 글 작성
 document.getElementById('addPostBtn').onclick = async () => {
     const text = document.getElementById('post-text').value;
-    if(!text.trim() || !auth.currentUser) return;
-    await addDoc(collection(db, "posts"), { text, user: auth.currentUser.displayName, createdAt: new Date() });
+
+    if (!text.trim() || !auth.currentUser) return;
+
+    await addDoc(collection(db, "posts"), {
+        text,
+        user: auth.currentUser.displayName,
+        createdAt: new Date()
+    });
+
     document.getElementById('post-text').value = "";
 };
 
+// 로그인 상태
 onAuthStateChanged(auth, (user) => {
-    const isAdmin = user && user.email === ADMIN_EMAIL;
-    document.getElementById('admin-panel').classList.toggle('hidden', !isAdmin);
-    document.getElementById('post-input-section').classList.toggle('hidden', !user);
-    document.getElementById('post-login-msg').classList.toggle('hidden', !!user);
-    const loginBtn = document.getElementById('loginBtn');
-    loginBtn.innerText = user ? "로그아웃" : "관리자 로그인";
-    loginBtn.onclick = () => user ? signOut(auth) : signInWithPopup(auth, provider);
+    const btn = document.getElementById('loginBtn');
+
+    btn.innerText = user ? "로그아웃" : "로그인";
+    btn.onclick = () =>
+        user ? signOut(auth) : signInWithPopup(auth, provider);
 });
 
-document.getElementById('saveBtn').onclick = async () => {
-    if(!confirm("저장할까요?")) return;
+// 저장 (관리자)
+document.getElementById('saveBtn')?.addEventListener('click', async () => {
     await setDoc(dataDoc, {
         examDate: document.getElementById('input-date').value,
         rawAssessments: document.getElementById('input-assessments').value,
         rawRanges: document.getElementById('input-ranges').value,
-        notice: document.getElementById('input-notice').value,
-        plSchedule: document.getElementById('input-pl').value,
-        lastUpdated: new Date().toLocaleString()
+        notice: document.getElementById('input-notice').value
     });
-    alert("저장 완료!");
-};
+
+    alert("저장 완료");
+});

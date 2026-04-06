@@ -128,16 +128,15 @@ onSnapshot(dataDoc, (snap) => {
 // [급식 기능 함수]
 async function getMeal() {
     const mealEl = document.getElementById('meal-content');
-    if (!mealEl) return;
-
     try {
         const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const yyyymmdd = `${year}${month}${day}`;
+        
+        // --- 테스트 구간 시작 ---
+        // 원래 코드: const yyyymmdd = `${year}${month}${day}`;
+        // 테스트용: 급식이 확실히 있었던 과거의 평일 날짜로 고정합니다.
+        const yyyymmdd = "20260330"; 
+        // --- 테스트 구간 끝 ---
 
-        // 인증키와 정확한 학교 코드(8140052) 적용
         const neisKey = "3366de199e3b43ccb46803dcdceb0a92";
         const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=${neisKey}&Type=json&ATPT_OFCDC_SC_CODE=N10&SD_SCHUL_CODE=8140052&MLSV_YMD=${yyyymmdd}`;
 
@@ -146,27 +145,18 @@ async function getMeal() {
 
         if (data.mealServiceDietInfo) {
             let menu = data.mealServiceDietInfo[1].row[0].DDISH_NM;
-            // 알레르기 번호 제거 및 줄바꿈 정리
             menu = menu.replace(/[0-9.]/g, "").replace(/\(\)/g, "").replace(/<br\/>/g, ", ");
-            
             mealEl.innerHTML = `
                 <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
                     <p class="text-emerald-700 font-bold text-base leading-relaxed">${menu}</p>
-                    <p class="text-[10px] text-emerald-400 mt-2 font-medium">✨ 오늘의 점심 메뉴입니다!</p>
                 </div>
             `;
         } else {
-            // 데이터가 없는 경우 (INFO-200)
-            const msg = data.RESULT ? data.RESULT.MESSAGE : "등록된 식단이 없습니다.";
-            mealEl.innerHTML = `
-                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                    <p class="text-gray-500 text-sm italic text-center">🍱 ${msg}</p>
-                </div>
-            `;
+            // 데이터가 없을 때 메시지
+            mealEl.innerHTML = `<p class="text-sm text-gray-400 italic">🍱 데이터가 없습니다. (날짜: ${yyyymmdd})</p>`;
         }
     } catch (e) {
-        console.error("Meal Error:", e);
-        mealEl.innerHTML = `<p class="text-xs text-red-400 font-bold text-center">⚠️ 급식 서버 연결 실패</p>`;
+        mealEl.innerHTML = `<p class="text-xs text-red-400">⚠️ 연결 에러</p>`;
     }
 }
 

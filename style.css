@@ -26,10 +26,10 @@
     --red: #ef4444;
     --red-light: #fef2f2;
 
-    --radius: 16px;
-    --radius-sm: 10px;
-    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.06);
-    --shadow-lg: 0 8px 32px rgba(0,0,0,.10);
+    --radius: 24px;
+    --radius-sm: 16px;
+    --shadow: 0 2px 8px rgba(0,0,0,.06), 0 6px 24px rgba(0,0,0,.07);
+    --shadow-lg: 0 10px 40px rgba(0,0,0,.12);
 
     --font-body: 'Noto Sans KR', sans-serif;
     --font-mono: 'Space Mono', monospace;
@@ -199,10 +199,10 @@ body {
 .site-main {
     max-width: 800px;
     margin: 0 auto;
-    padding: 24px 16px 60px;
+    padding: 32px 20px 80px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 28px;
 }
 
 /* ══════════════════════════════
@@ -212,14 +212,14 @@ body {
     background: var(--surface);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
-    padding: 20px;
+    padding: 24px;
     border-top: 4px solid var(--accent);
 }
 
 .alert-grid {
     display: grid;
     grid-template-columns: 1fr 2fr;
-    gap: 14px;
+    gap: 16px;
 }
 
 @media (max-width: 520px) {
@@ -228,7 +228,7 @@ body {
 
 .alert-card {
     border-radius: var(--radius-sm);
-    padding: 16px;
+    padding: 20px;
 }
 
 .alert-dday {
@@ -273,7 +273,7 @@ body {
 .info-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 14px;
+    gap: 16px;
 }
 
 @media (max-width: 600px) {
@@ -284,7 +284,7 @@ body {
     background: var(--surface);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
-    padding: 20px;
+    padding: 24px;
 }
 
 .info-card-header {
@@ -405,7 +405,7 @@ body {
 .range-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 16px;
 }
 
 @media (max-width: 540px) {
@@ -417,7 +417,7 @@ body {
     background: var(--surface);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
-    padding: 18px 20px;
+    padding: 22px 24px;
     border-left: 4px solid var(--green);
     transition: transform .15s, box-shadow .15s;
 }
@@ -447,7 +447,7 @@ body {
     background: var(--surface);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
-    padding: 24px;
+    padding: 28px;
 }
 
 .board-header {
@@ -472,7 +472,7 @@ body {
 
 .post-textarea {
     width: 100%;
-    padding: 14px;
+    padding: 16px;
     font-family: var(--font-body);
     font-size: 14px;
     color: var(--text-primary);
@@ -495,7 +495,7 @@ body {
     color: #fff;
     border: none;
     border-radius: var(--radius-sm);
-    padding: 10px 20px;
+    padding: 12px 24px;
     font-family: var(--font-body);
     font-size: 13px;
     font-weight: 700;
@@ -519,19 +519,19 @@ body {
     color: var(--text-muted);
     border: 2px dashed var(--border);
     border-radius: var(--radius-sm);
-    padding: 18px;
+    padding: 22px;
     margin-bottom: 20px;
 }
 
 /* Post list */
-.post-list { display: flex; flex-direction: column; gap: 12px; }
+.post-list { display: flex; flex-direction: column; gap: 16px; }
 
 /* post items injected by script.js */
 #post-list > div {
     background: var(--surface-2);
     border: 1px solid var(--border-light);
     border-radius: var(--radius-sm);
-    padding: 14px 16px;
+    padding: 18px 20px;
     transition: border-color .15s;
 }
 
@@ -579,7 +579,7 @@ body {
 .admin-panel {
     background: #0f172a;
     border-radius: var(--radius);
-    padding: 24px;
+    padding: 28px;
     margin-top: 12px;
     box-shadow: var(--shadow-lg);
 }
@@ -617,8 +617,8 @@ body {
     font-size: 13px;
     background: rgba(255,255,255,.06);
     border: 1px solid rgba(255,255,255,.1);
-    border-radius: 8px;
-    padding: 10px 12px;
+    border-radius: 12px;
+    padding: 12px 14px;
     color: #fff;
     outline: none;
     transition: border-color .2s;

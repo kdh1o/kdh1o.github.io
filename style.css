@@ -40,3 +40,21 @@
 .hidden {
     display: none;
 }
+/* style.css 맨 아래 추가 */
+
+/* 모바일 브라우저에서 헤더가 겹치는 문제 방지 */
+body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden; /* 가로 스크롤 방지 */
+}
+
+header {
+    min-height: 80px; /* 헤더의 최소 높이 확보 */
+}
+
+/* 탭 버튼 글자가 너무 길어 깨질 때 조절 */
+nav button {
+    font-size: 0.9rem;
+    white-space: nowrap; /* 글자 줄바꿈 방지 */
+}

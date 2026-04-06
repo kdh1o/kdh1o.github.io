@@ -17,7 +17,7 @@
                 <p class="text-indigo-400 text-xs font-bold mb-1 tracking-widest uppercase">Buyeo High School 1-4</p>
                 <h1 class="text-3xl font-black tracking-tighter">📢 BYHS 1-4</h1>
             </div>
-            <button id="loginBtn" class="text-[10px] opacity-40 hover:opacity-100 border border-white/30 px-2 py-1 rounded uppercase">Admin</button>
+            <button id="loginBtn" class="text-[10px] opacity-60 hover:opacity-100 border border-white/30 px-3 py-1.5 rounded uppercase font-bold transition-all">Admin</button>
         </div>
     </header>
 
@@ -51,12 +51,12 @@
         </div>
 
         <div id="content-pl" class="hidden">
-            <section class="card !bg-slate-900 border-none shadow-indigo-500/20 shadow-xl text-white p-8">
+            <section class="card !bg-slate-900 border-none text-white p-8">
                 <div class="flex justify-between items-center mb-8">
                     <h2 class="text-2xl font-black italic tracking-tighter text-cyan-400 underline decoration-cyan-500/30">BOORIMIER LEAGUE</h2>
                     <i class="fas fa-trophy text-yellow-400 text-2xl animate-bounce"></i>
                 </div>
-                <div id="pl-main-content" class="space-y-6 min-h-[200px] flex items-center justify-center text-center"></div>
+                <div id="pl-main-content" class="min-h-[200px] flex items-center justify-center text-center"></div>
             </section>
         </div>
 
@@ -78,32 +78,26 @@
         <div id="content-board" class="hidden">
             <section class="card">
                 <h2 class="title mb-4">💬 우리들의 공간</h2>
-                <div id="post-input-section" class="hidden mb-6"><textarea id="post-text" class="input mb-3" rows="3" placeholder="기분 좋은 한마디를 남겨주세요!"></textarea><button id="addPostBtn" class="btn-primary font-bold shadow-lg">작성하기</button></div>
+                <div id="post-input-section" class="hidden mb-6">
+                    <textarea id="post-text" class="input mb-3" rows="3" placeholder="기분 좋은 한마디를 남겨주세요!"></textarea>
+                    <button id="addPostBtn" class="btn-primary font-bold shadow-lg">작성하기</button>
+                </div>
+                <div id="post-login-msg" class="text-center py-10 text-gray-400 text-sm border-2 border-dashed border-gray-200 rounded-2xl mb-6">
+                    글을 쓰려면 로그인이 필요합니다. (상단 Admin 버튼 클릭)
+                </div>
                 <div id="post-list" class="space-y-4"></div>
             </section>
         </div>
 
         <section id="admin-panel" class="hidden mt-10 p-8 bg-slate-900 rounded-[2.5rem] text-white shadow-2xl relative z-[100]">
-            <h2 class="text-xl font-black mb-6 text-cyan-400 italic">관리자 수정</h2>
-            <div class="space-y-4 text-sm">
-                <div><label class="label">시험 날짜</label><input type="date" id="input-date" class="admin-input"></div>
-                <div>
-                    <label class="label">수행평가 (과목|내용|MM.DD)</label>
-                    <textarea id="input-assessments" class="admin-input h-24" placeholder="수학|교과서 문제 풀이|04.15&#10;영어|에세이 발표|04.20"></textarea>
-                </div>
-                <div>
-                    <label class="label">시험 범위 (과목:내용)</label>
-                    <textarea id="input-ranges" class="admin-input h-24" placeholder="수학:1단원 ~ 2단원&#10;영어:교과서 1과 ~ 3과"></textarea>
-                </div>
-                <div>
-                    <label class="label">공지사항</label>
-                    <textarea id="input-notice" class="admin-input h-24" placeholder="📢 내일은 운동복을 챙겨오세요!"></textarea>
-                </div>
-                <div>
-                    <label class="label">부리미어 리그 일정 (MM/DD HH:MM 내용)</label>
-                    <textarea id="input-pl" class="admin-input h-24" placeholder="04/10 13:00 1반 vs 4반 (운동장)"></textarea>
-                </div>
-                <button id="saveBtn" class="w-full bg-cyan-500 text-slate-900 font-black py-4 rounded-2xl mt-4 uppercase hover:bg-cyan-400 transition-all">Update Server</button>
+            <h2 class="text-xl font-black mb-6 text-cyan-400 italic">ADMIN DASHBOARD</h2>
+            <div class="space-y-4 text-sm text-slate-300">
+                <div><label class="block mb-2 font-bold">시험 날짜</label><input type="date" id="input-date" class="admin-input"></div>
+                <div><label class="block mb-2 font-bold">수행평가 (과목|내용|MM.DD)</label><textarea id="input-assessments" class="admin-input h-24" placeholder="수학|문제풀이|04.15"></textarea></div>
+                <div><label class="block mb-2 font-bold">시험 범위 (과목:내용)</label><textarea id="input-ranges" class="admin-input h-24" placeholder="수학:집합 ~ 함수"></textarea></div>
+                <div><label class="block mb-2 font-bold">공지사항</label><textarea id="input-notice" class="admin-input h-24" placeholder="📢 내일은 운동복 지참!"></textarea></div>
+                <div><label class="block mb-2 font-bold">PL 일정 (MM/DD HH:MM 내용)</label><textarea id="input-pl" class="admin-input h-24" placeholder="04/10 13:00 4반 vs 1반"></textarea></div>
+                <button id="saveBtn" class="w-full bg-cyan-500 text-slate-900 font-black py-4 rounded-2xl mt-4 uppercase hover:bg-cyan-400 transition-all active:scale-95">Update Server</button>
             </div>
         </section>
     </main>

@@ -2,7 +2,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, doc, setDoc, onSnapshot, collection, addDoc, query, orderBy, limit, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// 1. 파이어베이스 설정
 const firebaseConfig = {
     apiKey: "AIzaSyDKbxqZBW6NovbiJAFJGyZIQZfYIxGvbN8",
     authDomain: "byhs1-4.firebaseapp.com",
@@ -16,187 +15,142 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getFirestore();
 const provider = new GoogleAuthProvider();
-
 const ADMIN_EMAIL = "kr.craft1016@gmail.com"; 
 const dataDoc = doc(db, "classData", "main");
 
-// [유틸리티] 링크 자동 변환
-const linkify = (text) => {
-    if (!text) return "";
-    const urlPattern = /(https?:\/\/[^\s]+)/g;
-    return text.replace(urlPattern, '<a href="$1" target="_blank" class="auto-link font-bold underline text-indigo-500">$1</a>');
+let mealStore = { 1: "정보 없음", 2: "정보 없음", 3: "정보 없음" };
+
+// [유틸리티]
+const linkify = (t) => t ? t.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-indigo-500 font-bold underline">$1</a>') : "";
+
+// [탭 전환 시스템]
+const switchTab = (tab) => {
+    ['exam', 'pl', 'meal', 'board'].forEach(t => {
+        document.getElementById(`content-${t}`).classList.add('hidden');
+        document.getElementById(`tab-${t}`).className = 'flex-1 py-4 font-bold text-gray-400 transition-all text-[13px]';
+    });
+    document.getElementById(`content-${tab}`).classList.remove('hidden');
+    document.getElementById(`tab-${tab}`).className = 'flex-1 py-4 font-bold tab-active transition-all text-[13px]';
+    if(tab === 'meal') getMeal();
 };
 
-// [탭 전환 로직]
-const switchTab = (tab) => {
-    document.getElementById('content-exam').classList.toggle('hidden', tab !== 'exam');
-    document.getElementById('content-board').classList.toggle('hidden', tab !== 'board');
-    document.getElementById('tab-exam').className = tab === 'exam' ? 'flex-1 py-4 font-bold tab-active' : 'flex-1 py-4 font-bold text-gray-400';
-    document.getElementById('tab-board').className = tab === 'board' ? 'flex-1 py-4 font-bold tab-active' : 'flex-1 py-4 font-bold text-gray-400';
-};
 document.getElementById('tab-exam').onclick = () => switchTab('exam');
+document.getElementById('tab-pl').onclick = () => switchTab('pl');
+document.getElementById('tab-meal').onclick = () => switchTab('meal');
 document.getElementById('tab-board').onclick = () => switchTab('board');
 
-// [2. 급식 기능: 나이스 API 직접 호출]
+// [급식 로직: 시간별 자동 전환]
 async function getMeal() {
-    const mealEl = document.getElementById('meal-content');
-    if (!mealEl) return;
-
+    const container = document.getElementById('meal-display-container');
     try {
         const now = new Date();
-        const yyyy = now.getFullYear();
-        const mm = String(now.getMonth() + 1).padStart(2, '0');
-        const dd = String(now.getDate()).padStart(2, '0');
-        const today = `${yyyy}${mm}${dd}`;
-
-        // 인증키 및 학교 정보 (부여고: 8140052 / 충남: N10)
+        const today = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
         const key = "3366de199e3b43ccb46803dcdceb0a92";
         const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=${key}&Type=json&ATPT_OFCDC_SC_CODE=N10&SD_SCHUL_CODE=8140052&MLSV_YMD=${today}`;
 
-        const res = await fetch(url);
-        const data = await res.json();
-
-        if (data.mealServiceDietInfo) {
-            let menu = data.mealServiceDietInfo[1].row[0].DDISH_NM;
-            // 알레르기 번호 및 불필요 문자 제거 정규식
-            menu = menu.replace(/[0-9.]/g, "").replace(/\(\)/g, "").replace(/<br\/>/g, ", ");
-            
-            mealEl.innerHTML = `
-                <div class="bg-emerald-50 p-5 rounded-2xl border border-emerald-100 shadow-sm">
-                    <p class="text-emerald-800 font-bold text-base leading-relaxed break-keep">${menu}</p>
-                    <p class="text-[10px] text-emerald-400 mt-2 font-medium italic">오늘의 메뉴입니다. 맛있게 드세요! ✨</p>
-                </div>
-            `;
-        } else {
-            mealEl.innerHTML = `<div class="text-center py-4 text-gray-400 italic text-sm border-2 border-dashed border-gray-100 rounded-2xl">🍱 오늘 등록된 식단이 없습니다.</div>`;
-        }
-    } catch (e) {
-        console.error(e);
-        mealEl.innerHTML = `<div class="text-center py-4 text-red-400 text-xs font-bold">⚠️ 급식 서버 연결 실패</div>`;
-    }
-}
-
-// [3. 파이어베이스 실시간 데이터 수신]
-onSnapshot(dataDoc, (snap) => {
-    if (snap.exists()) {
-        const data = snap.data();
-        
-        // 시험 디데이
-        const examDiff = new Date(data.examDate) - new Date();
-        const examDays = Math.ceil(examDiff / (1000 * 60 * 60 * 24));
-        document.getElementById('exam-dday').innerText = examDays > 0 ? `D-${examDays}` : (examDays === 0 ? "D-Day" : "종료");
-
-        // 공지사항
-        document.getElementById('notice-content').innerHTML = linkify(data.notice || "공지가 없습니다.");
-
-        // 부리미어 리그 디데이 계산
-        const plRaw = data.plSchedule || "";
-        const plEl = document.getElementById('pl-content');
-        const timeRegex = /(\d{1,2})[./](\d{1,2})\s+(\d{1,2}):(\d{2})/;
-        const plMatch = plRaw.match(timeRegex);
-        if (plMatch) {
-            const [_, mon, day, hr, min] = plMatch;
-            const now = new Date();
-            const gameDate = new Date(now.getFullYear(), parseInt(mon) - 1, parseInt(day), parseInt(hr), parseInt(min));
-            const tDiff = gameDate - now;
-            if (tDiff > 0) {
-                const d = Math.floor(tDiff / (1000 * 60 * 60 * 24));
-                const h = Math.floor((tDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const m = Math.floor((tDiff % (1000 * 60 * 60)) / (1000 * 60));
-                let ddayStr = d > 0 ? `D-${d} ${h}시간 전` : (h > 0 ? `${h}시간 ${m}분 전` : `${m}분 전`);
-                plEl.innerHTML = `<div class="mb-2 flex items-center gap-2"><span class="bg-cyan-400 text-slate-900 text-[9px] font-black px-2 py-0.5 rounded-full animate-blink uppercase">Coming</span><span class="text-cyan-400 text-xs font-bold">${ddayStr}</span></div><div class="text-lg font-bold text-white tracking-tight">${linkify(plRaw)}</div>`;
-            } else {
-                plEl.innerHTML = `<div class="text-slate-500 font-bold text-xs italic">[진행중/종료]</div><div class="text-slate-400 text-sm mt-1">${linkify(plRaw)}</div>`;
-            }
-        } else { plEl.innerHTML = `<div class="text-slate-500 text-sm">${linkify(plRaw || "일정이 없습니다.")}</div>`; }
-
-        // 수행평가 리스트 및 상단 D-Day
-        const listBody = document.getElementById('assessment-list');
-        listBody.innerHTML = "";
-        const rows = (data.rawAssessments || "").split('\n').filter(r => r.includes('|'));
-        if(rows.length > 0) {
-            const [subj, cont, dateStr] = rows[0].split('|');
-            const now = new Date();
-            const [m, d] = dateStr.split('.').map(v => parseInt(v));
-            const targetDate = new Date(now.getFullYear(), m - 1, d);
-            const diff = Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24));
-            let ddayText = diff > 0 ? `D-${diff}` : (diff === 0 ? "D-Day" : "종료");
-            document.getElementById('nearest-assessment').innerHTML = `<p class="text-red-600 font-black text-2xl">${ddayText}</p><p class="text-gray-700 text-[10px] font-bold mt-1 tracking-tight">${subj}</p>`;
-            rows.forEach(r => {
-                const [s, c, d_val] = r.split('|');
-                listBody.innerHTML += `<tr><td class="p-4 font-extrabold text-indigo-600">${s}</td><td class="p-4 text-gray-600">${linkify(c)}</td><td class="p-4 text-right font-bold text-slate-400">${d_val}</td></tr>`;
-            });
-        }
-
-        // 시험 범위 렌더링
-        const rangeCont = document.getElementById('range-cards');
-        rangeCont.innerHTML = "";
-        (data.rawRanges || "").split('\n').forEach(l => {
-            if(l.includes(':')) {
-                const [t, d] = l.split(':');
-                rangeCont.innerHTML += `<div class="bg-indigo-50/30 p-6 rounded-2xl border border-indigo-100/50 hover:bg-white transition-colors"><h3 class="font-bold text-indigo-700 text-xl mb-2 flex items-center gap-2"><span class="w-1 h-5 bg-indigo-400 rounded-full"></span>${t}</h3><p class="text-lg font-medium text-slate-700 leading-relaxed">${linkify(d)}</p></div>`;
-            }
+        const resArr = await Promise.all([1,2,3].map(c => fetch(`${url}&MMEAL_SC_CODE=${c}`).then(r => r.json())));
+        resArr.forEach((d, i) => {
+            mealStore[i+1] = d.mealServiceDietInfo ? d.mealServiceDietInfo[1].row[0].DDISH_NM.replace(/[0-9.]/g, "").replace(/\(\)/g, "").replace(/<br\/>/g, ", ") : "오늘 식단 정보가 없습니다. 🍱";
         });
 
-        // 관리자 인풋 동기화
-        document.getElementById('input-date').value = data.examDate || "";
-        document.getElementById('input-assessments').value = data.rawAssessments || "";
-        document.getElementById('input-ranges').value = data.rawRanges || "";
-        document.getElementById('input-notice').value = data.notice || "";
-        document.getElementById('input-pl').value = data.plSchedule || "";
-    }
-});
+        // 시간별 자동 선택 (8:30 전 조식, 13:30 전 중식, 이후 석식)
+        const hourMin = now.getHours() * 100 + now.getMinutes();
+        let defaultMeal = hourMin < 830 ? 1 : (hourMin < 1330 ? 2 : 3);
+        showMeal(defaultMeal);
+        document.getElementById('meal-update-time').innerText = `LAST UPDATED: ${now.toLocaleDateString()}`;
+    } catch (e) { container.innerHTML = "<p class='text-red-400 font-bold'>서버 연결 실패</p>"; }
+}
 
-// [4. 게시판 로직]
-const q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(40));
-onSnapshot(q, (snap) => {
-    const list = document.getElementById('post-list');
-    list.innerHTML = "";
-    const isAdmin = auth.currentUser && auth.currentUser.email === ADMIN_EMAIL;
-    snap.forEach(docSnap => {
-        const p = docSnap.data();
-        const postId = docSnap.id;
-        const postEl = document.createElement('div');
-        postEl.className = "card !p-5 bg-white/60 hover:bg-white transition-all border border-gray-100";
-        let delBtn = isAdmin ? `<button class="text-red-400 text-[10px] ml-2 font-bold hover:underline" onclick="window.deletePost('${postId}')">삭제</button>` : "";
-        postEl.innerHTML = `<div class="flex justify-between text-[11px] mb-2 text-gray-400"><div><span class="font-black text-indigo-500 mr-1">${p.user}</span>${delBtn}</div><span>${p.createdAt?.toDate().toLocaleString().slice(5, 16)}</span></div><p class="text-[14px] text-slate-700 leading-relaxed font-medium">${linkify(p.text)}</p>`;
-        list.appendChild(postEl);
+function showMeal(type) {
+    const container = document.getElementById('meal-display-container');
+    const cfg = { 1: ['orange', '아침 식단'], 2: ['emerald', '점심 식단'], 3: ['indigo', '저녁 식단'] }[type];
+    [1,2,3].forEach(t => {
+        const btn = document.getElementById(`btn-meal-${t}`);
+        btn.className = t === type ? `px-5 py-2.5 rounded-xl bg-white shadow-md text-${cfg[0]}-600 font-black transform scale-105 transition-all` : `px-5 py-2.5 rounded-xl text-gray-400 font-bold hover:text-gray-600 transition-all`;
+    });
+    container.style.opacity = 0;
+    setTimeout(() => {
+        container.innerHTML = `<div class="w-full bg-${cfg[0]}-50/50 p-8 rounded-[2.5rem] border border-${cfg[0]}-100 text-center"><p class="text-[10px] text-${cfg[0]}-400 font-black mb-3 uppercase tracking-widest">${cfg[1]}</p><p class="text-${cfg[0]}-900 font-extrabold text-lg leading-relaxed break-keep">${mealStore[type]}</p></div>`;
+        container.style.opacity = 1;
+    }, 150);
+}
+[1,2,3].forEach(t => document.getElementById(`btn-meal-${t}`).onclick = () => showMeal(t));
+
+// [데이터 수신 및 렌더링]
+onSnapshot(dataDoc, (snap) => {
+    if (!snap.exists()) return;
+    const data = snap.data();
+    
+    // 시험 D-Day
+    const diff = new Date(data.examDate) - new Date();
+    document.getElementById('exam-dday').innerText = diff > 0 ? `D-${Math.ceil(diff/(1000*60*60*24))}` : "종료";
+    document.getElementById('notice-content').innerHTML = linkify(data.notice);
+
+    // 부리미어 리그 전용 탭 렌더링
+    const plRaw = data.plSchedule || "";
+    const plEl = document.getElementById('pl-main-content');
+    const plMatch = plRaw.match(/(\d{1,2})[./](\d{1,2})\s+(\d{1,2}):(\d{2})/);
+    if(plMatch) {
+        const gameDate = new Date(new Date().getFullYear(), parseInt(plMatch[1])-1, parseInt(plMatch[2]), parseInt(plMatch[3]), parseInt(plMatch[4]));
+        const tDiff = gameDate - new Date();
+        if(tDiff > 0) {
+            const h = Math.floor(tDiff/(1000*60*60));
+            plEl.innerHTML = `<div><span class="bg-cyan-500 text-slate-900 px-3 py-1 rounded-full text-[10px] font-black animate-pulse">NEXT MATCH</span><h3 class="text-5xl font-black mt-6 mb-4 text-white">${h > 24 ? 'D-'+Math.floor(h/24) : h+'h 전'}</h3><p class="text-slate-400 font-medium">${linkify(plRaw)}</p></div>`;
+        } else {
+            plEl.innerHTML = `<div class="w-full bg-slate-800/50 p-6 rounded-3xl border border-slate-700 text-left"><p class="text-cyan-400 font-bold text-xs mb-2 italic">MATCH INFO</p><p class="text-xl font-bold">${linkify(plRaw)}</p></div>`;
+        }
+    } else { plEl.innerHTML = `<p class="text-slate-500">${linkify(plRaw || "경기 일정이 없습니다.")}</p>`; }
+
+    // 수행평가 & 시험범위
+    const list = document.getElementById('assessment-list'); list.innerHTML = "";
+    const rows = (data.rawAssessments || "").split('\n').filter(r => r.includes('|'));
+    if(rows.length > 0) {
+        const [s, c, d] = rows[0].split('|');
+        const target = new Date(new Date().getFullYear(), parseInt(d.split('.')[0])-1, parseInt(d.split('.')[1]));
+        document.getElementById('nearest-assessment').innerHTML = `<p class="text-red-600 font-black text-2xl">D-${Math.ceil((target-new Date())/(1000*60*60*24))}</p><p class="text-gray-700 text-[10px] font-bold mt-1">${s}</p>`;
+        rows.forEach(r => { const [subj, cont, date] = r.split('|'); list.innerHTML += `<tr><td class="p-4 font-black text-indigo-600">${subj}</td><td class="p-4 text-gray-600">${linkify(cont)}</td><td class="p-4 text-right font-bold text-slate-400">${date}</td></tr>`; });
+    }
+    const rCont = document.getElementById('range-cards'); rCont.innerHTML = "";
+    (data.rawRanges || "").split('\n').forEach(l => { if(l.includes(':')) { const [t, d] = l.split(':'); rCont.innerHTML += `<div class="bg-white p-6 rounded-2xl border border-indigo-50 transition-all hover:shadow-md"><h3 class="font-bold text-indigo-700 text-lg mb-2 underline decoration-indigo-200 decoration-4 underline-offset-4">${t}</h3><p class="text-slate-600 text-sm leading-relaxed">${linkify(d)}</p></div>`; }});
+
+    // 어드민 동기화
+    ['input-date', 'input-assessments', 'input-ranges', 'input-notice', 'input-pl'].forEach(id => {
+        const key = id.replace('input-', id === 'input-date' ? 'exam' : (id === 'input-pl' ? 'plSchedule' : (id === 'input-assessments' ? 'rawAssessments' : (id === 'input-ranges' ? 'rawRanges' : 'notice'))));
+        document.getElementById(id).value = data[key] || "";
     });
 });
 
-window.deletePost = async (id) => { if(confirm("글을 삭제하시겠습니까?")) await deleteDoc(doc(db, "posts", id)); };
-
+// [게시판 & 인증]
+const q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(30));
+onSnapshot(q, (snap) => {
+    const list = document.getElementById('post-list'); list.innerHTML = "";
+    snap.forEach(docSnap => {
+        const p = docSnap.data();
+        const postEl = document.createElement('div');
+        postEl.className = "card !p-5 bg-white shadow-sm border border-gray-50";
+        let delBtn = auth.currentUser?.email === ADMIN_EMAIL ? `<button class="text-red-400 text-[10px] ml-2" onclick="window.deletePost('${docSnap.id}')">삭제</button>` : "";
+        postEl.innerHTML = `<div class="flex justify-between text-[11px] mb-2 text-gray-400"><div><span class="font-black text-indigo-500 mr-2">${p.user}</span>${delBtn}</div><span>${p.createdAt?.toDate().toLocaleString().slice(5, 16)}</span></div><p class="text-sm text-slate-700 font-medium">${linkify(p.text)}</p>`;
+        list.appendChild(postEl);
+    });
+});
+window.deletePost = async (id) => confirm("삭제할까요?") && await deleteDoc(doc(db, "posts", id));
 document.getElementById('addPostBtn').onclick = async () => {
     const text = document.getElementById('post-text').value;
     if(!text.trim() || !auth.currentUser) return;
     await addDoc(collection(db, "posts"), { text, user: auth.currentUser.displayName, createdAt: new Date() });
     document.getElementById('post-text').value = "";
 };
-
-// [5. 인증 및 관리자 설정]
 onAuthStateChanged(auth, (user) => {
-    const isAdmin = user && user.email === ADMIN_EMAIL;
-    document.getElementById('admin-panel').classList.toggle('hidden', !isAdmin);
+    document.getElementById('admin-panel').classList.toggle('hidden', user?.email !== ADMIN_EMAIL);
     document.getElementById('post-input-section').classList.toggle('hidden', !user);
     document.getElementById('post-login-msg').classList.toggle('hidden', !!user);
-    const loginBtn = document.getElementById('loginBtn');
-    loginBtn.innerText = user ? "LOGOUT" : "ADMIN";
-    loginBtn.onclick = () => user ? signOut(auth) : signInWithPopup(auth, provider);
+    document.getElementById('loginBtn').innerText = user ? "LOGOUT" : "ADMIN";
+    document.getElementById('loginBtn').onclick = () => user ? signOut(auth) : signInWithPopup(auth, provider);
 });
-
-// 관리자 데이터 저장 버튼
 document.getElementById('saveBtn').onclick = async () => {
-    if(!confirm("입력한 데이터를 서버에 저장할까요?")) return;
-    await setDoc(dataDoc, {
-        examDate: document.getElementById('input-date').value,
-        rawAssessments: document.getElementById('input-assessments').value,
-        rawRanges: document.getElementById('input-ranges').value,
-        notice: document.getElementById('input-notice').value,
-        plSchedule: document.getElementById('input-pl').value,
-        lastUpdated: new Date().toLocaleString()
-    });
-    alert("서버 저장 완료!");
+    if(!confirm("서버에 저장하시겠습니까?")) return;
+    await setDoc(dataDoc, { examDate: document.getElementById('input-date').value, rawAssessments: document.getElementById('input-assessments').value, rawRanges: document.getElementById('input-ranges').value, notice: document.getElementById('input-notice').value, plSchedule: document.getElementById('input-pl').value });
+    alert("저장 완료!");
 };
 
-// [실행] 급식 함수 호출
 getMeal();

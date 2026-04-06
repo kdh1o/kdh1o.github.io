@@ -1,11 +1,9 @@
-/* 탭 활성화 스타일 */
 .tab-active { 
     border-bottom: 4px solid #4f46e5; 
     color: #4f46e5; 
     font-weight: bold; 
 }
 
-/* 자동 하이퍼링크 스타일 */
 .auto-link { 
     color: #2563eb; 
     text-decoration: underline; 
@@ -16,7 +14,6 @@
     color: #1e40af; 
 }
 
-/* 게시물 삭제 버튼 */
 .delete-btn { 
     color: #ef4444; 
     font-size: 0.75rem; 
@@ -31,7 +28,12 @@
     text-decoration: underline; 
 }
 
-/* 기본 숨김 처리 */
+/* 줄바꿈 및 긴 단어 처리 */
+.whitespace-pre-wrap {
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
 .hidden {
     display: none;
 }

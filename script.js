@@ -34,6 +34,7 @@ const switchTab = (tab) => {
 document.getElementById('tab-exam').onclick = () => switchTab('exam');
 document.getElementById('tab-board').onclick = () => switchTab('board');
 
+// [데이터 실시간 수신]
 onSnapshot(dataDoc, (snap) => {
     if (snap.exists()) {
         const data = snap.data();
@@ -46,7 +47,7 @@ onSnapshot(dataDoc, (snap) => {
         // 2. 공지사항
         document.getElementById('notice-content').innerHTML = linkify(data.notice || "공지가 없습니다.");
 
-        // 3. 부리미어 리그 디데이 (전광판 스타일)
+        // 3. 부리미어 리그 디데이
         const plRaw = data.plSchedule || "";
         const plEl = document.getElementById('pl-content');
         const timeRegex = /(\d{1,2})[./](\d{1,2})\s+(\d{1,2}):(\d{2})/;
@@ -65,23 +66,22 @@ onSnapshot(dataDoc, (snap) => {
                 let ddayStr = d > 0 ? `D-${d} ${h}시간 전` : (h > 0 ? `${h}시간 ${m}분 전` : `${m}분 전`);
                 plEl.innerHTML = `
                     <div class="mb-2 flex items-center gap-2">
-                        <span class="bg-cyan-400 text-slate-900 text-[10px] font-black px-2 py-0.5 rounded-full animate-blink uppercase">Live Coming</span>
+                        <span class="bg-cyan-400 text-slate-900 text-[10px] font-black px-2 py-0.5 rounded-full animate-blink uppercase">Coming Soon</span>
                         <span class="text-cyan-400 text-xs font-bold">${ddayStr}</span>
                     </div>
                     <div class="text-lg font-bold text-white tracking-tight">${linkify(plRaw)}</div>
                 `;
             } else {
-                plEl.innerHTML = `<div class="text-slate-500 font-bold text-sm italic">[경기 종료 또는 진행중]</div><div class="text-slate-400 text-sm mt-1">${linkify(plRaw)}</div>`;
+                plEl.innerHTML = `<div class="text-slate-500 font-bold text-sm italic">[경기 진행중 또는 종료]</div><div class="text-slate-400 text-sm mt-1">${linkify(plRaw)}</div>`;
             }
         } else { plEl.innerHTML = `<div class="text-slate-500 text-sm">${linkify(plRaw || "일정이 없습니다.")}</div>`; }
 
-        // 4. 수행평가 리스트 & 가장 가까운 수행 D-Day
+        // 4. 수행평가 리스트 & 상단 D-Day
         const listBody = document.getElementById('assessment-list');
         listBody.innerHTML = "";
         const rows = (data.rawAssessments || "").split('\n').filter(r => r.includes('|'));
         
         if(rows.length > 0) {
-            // 수행평가 상단 D-Day 계산
             const [subj, cont, dateStr] = rows[0].split('|');
             const now = new Date();
             const [m, d] = dateStr.split('.').map(v => parseInt(v));
@@ -95,19 +95,19 @@ onSnapshot(dataDoc, (snap) => {
             `;
 
             rows.forEach(r => {
-                const [s, c, d] = r.split('|');
-                listBody.innerHTML += `<tr><td class="p-4 font-extrabold text-indigo-600">${s}</td><td class="p-4 text-gray-600">${linkify(c)}</td><td class="p-4 text-right font-bold text-slate-400">${d}</td></tr>`;
+                const [s, c, d_val] = r.split('|');
+                listBody.innerHTML += `<tr><td class="p-4 font-extrabold text-indigo-600">${s}</td><td class="p-4 text-gray-600">${linkify(c)}</td><td class="p-4 text-right font-bold text-slate-400">${d_val}</td></tr>`;
             });
         }
 
-        // 5. 시험 범위 (폰트 크기 및 내용 가독성 확대)
+        // 5. 시험 범위 (확대 적용)
         const rangeCont = document.getElementById('range-cards');
         rangeCont.innerHTML = "";
         (data.rawRanges || "").split('\n').forEach(l => {
             if(l.includes(':')) {
                 const [t, d] = l.split(':');
                 rangeCont.innerHTML += `
-                    <div class="bg-indigo-50/30 p-6 rounded-2xl border border-indigo-100/50 hover:bg-white transition-colors">
+                    <div class="bg-indigo-50/30 p-6 rounded-2xl border border-indigo-100/50">
                         <h3 class="font-bold text-indigo-700 text-xl mb-2 flex items-center gap-2">
                             <span class="w-1 h-5 bg-indigo-400 rounded-full"></span>${t}
                         </h3>
@@ -116,7 +116,7 @@ onSnapshot(dataDoc, (snap) => {
             }
         });
 
-        // 관리자 인풋 동기화
+        // 관리자 인풋값 동기화
         document.getElementById('input-date').value = data.examDate || "";
         document.getElementById('input-assessments').value = data.rawAssessments || "";
         document.getElementById('input-ranges').value = data.rawRanges || "";
@@ -125,7 +125,30 @@ onSnapshot(dataDoc, (snap) => {
     }
 });
 
-// [게시판 및 로그인 로직은 동일하게 유지]
+// [급식 기능 함수]
+async function getMeal() {
+    const mealEl = document.getElementById('meal-content');
+    const now = new Date();
+    const yyyymmdd = now.toISOString().slice(0, 10).replace(/-/g, ""); 
+    const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&ATPT_OFCDC_SC_CODE=N10&SD_SCHUL_CODE=8140085&MLSV_YMD=${yyyymmdd}`;
+
+    try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.mealServiceDietInfo) {
+            let menu = data.mealServiceDietInfo[1].row[0].DDISH_NM;
+            menu = menu.replace(/[0-9.]/g, "").replace(/\(\)/g, "").replace(/<br\/>/g, ", ");
+            mealEl.innerHTML = `
+                <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+                    <p class="text-emerald-700 font-bold text-base leading-relaxed">${menu}</p>
+                </div>
+            `;
+        } else { mealEl.innerHTML = `<p class="text-sm text-gray-400 italic">급식 정보가 없습니다. (주말/휴일)</p>`; }
+    } catch (e) { mealEl.innerHTML = `<p class="text-xs text-red-400">식단을 불러오지 못했습니다.</p>`; }
+}
+getMeal();
+
+// [게시판]
 const q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(40));
 onSnapshot(q, (snap) => {
     const list = document.getElementById('post-list');
@@ -162,7 +185,7 @@ onAuthStateChanged(auth, (user) => {
 });
 
 document.getElementById('saveBtn').onclick = async () => {
-    if(!confirm("서버 데이터를 갱신하시겠습니까?")) return;
+    if(!confirm("서버 데이터를 업데이트할까요?")) return;
     await setDoc(dataDoc, {
         examDate: document.getElementById('input-date').value,
         rawAssessments: document.getElementById('input-assessments').value,

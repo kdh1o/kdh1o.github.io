@@ -128,25 +128,48 @@ onSnapshot(dataDoc, (snap) => {
 // [급식 기능 함수]
 async function getMeal() {
     const mealEl = document.getElementById('meal-content');
-    const now = new Date();
-    const yyyymmdd = now.toISOString().slice(0, 10).replace(/-/g, ""); 
-    const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&ATPT_OFCDC_SC_CODE=N10&SD_SCHUL_CODE=8140085&MLSV_YMD=${yyyymmdd}`;
-
     try {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const yyyymmdd = `${year}${month}${day}`;
+
+        // 발급받으신 인증키 적용 (KEY 파라미터 추가)
+        const apiKey = "3366de199e3b43ccb46803dcdceb0a92";
+        const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=${apiKey}&Type=json&ATPT_OFCDC_SC_CODE=N10&SD_SCHUL_CODE=8140085&MLSV_YMD=${yyyymmdd}`;
+
         const res = await fetch(url);
         const data = await res.json();
+
+        // 성공적으로 데이터를 가져온 경우
         if (data.mealServiceDietInfo) {
             let menu = data.mealServiceDietInfo[1].row[0].DDISH_NM;
+            // 알레르기 번호 및 불필요한 문자 정제
             menu = menu.replace(/[0-9.]/g, "").replace(/\(\)/g, "").replace(/<br\/>/g, ", ");
+            
             mealEl.innerHTML = `
                 <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
                     <p class="text-emerald-700 font-bold text-base leading-relaxed">${menu}</p>
+                    <p class="text-[10px] text-emerald-400 mt-2 font-medium tracking-tight italic">오늘의 메뉴입니다. 맛있게 드세요! ✨</p>
                 </div>
             `;
-        } else { mealEl.innerHTML = `<p class="text-sm text-gray-400 italic">급식 정보가 없습니다. (주말/휴일)</p>`; }
-    } catch (e) { mealEl.innerHTML = `<p class="text-xs text-red-400">식단을 불러오지 못했습니다.</p>`; }
+        } 
+        // 데이터가 없는 경우 (INFO-200 등)
+        else {
+            const msg = data.RESULT ? data.RESULT.MESSAGE : "등록된 식단이 없습니다.";
+            mealEl.innerHTML = `
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 text-center">
+                    <p class="text-gray-500 text-sm italic">🍱 ${msg}</p>
+                    <p class="text-[10px] text-gray-400 mt-1">주말이거나 학교에서 아직 식단을 올리지 않았을 수 있어요.</p>
+                </div>
+            `;
+        }
+    } catch (e) {
+        console.error("급식 로딩 에러:", e);
+        mealEl.innerHTML = `<p class="text-xs text-red-400 font-bold text-center">⚠️ 급식 서버 연결에 실패했습니다.</p>`;
+    }
 }
-getMeal();
 
 // [게시판]
 const q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(40));

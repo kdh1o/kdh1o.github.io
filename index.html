@@ -1,95 +1,70 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BYHS 1-4</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BYHS 1-4</title>
 
-    <!-- Tailwind -->
-    <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- 폰트 -->
-    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;800&display=swap" rel="stylesheet">
 
-    <!-- 아이콘 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
-    <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body class="bg-gray-50 text-gray-800">
 
-<header class="w-full bg-gradient-to-r from-slate-800 to-slate-600 text-white py-6 px-6 shadow-lg relative">
-    <div class="max-w-4xl mx-auto">
-        <h1 class="text-2xl font-extrabold">📢 BYHS 1-4</h1>
-        <button id="loginBtn" class="absolute top-4 right-4 text-xs opacity-70 hover:opacity-100 border px-3 py-1 rounded-lg transition">관리자 로그인</button>
-    </div>
+<header class="bg-gradient-to-r from-slate-800 to-slate-600 text-white py-6 px-6 relative">
+    <h1 class="text-2xl font-extrabold">📢 BYHS 1-4</h1>
+    <button id="loginBtn" class="absolute right-6 top-6 text-xs border px-3 py-1 rounded">로그인</button>
 </header>
 
-<nav class="w-full bg-white shadow-sm sticky top-0 border-b">
-    <div class="max-w-4xl mx-auto flex">
-        <button id="tab-exam" class="flex-1 py-4 tab-active">🗓️ 학업 일정</button>
-        <button id="tab-board" class="flex-1 py-4 text-gray-500">💬 게시판</button>
-    </div>
+<nav class="bg-white flex border-b">
+    <button id="tab-exam" class="flex-1 py-4 tab-active">학업 일정</button>
+    <button id="tab-board" class="flex-1 py-4 text-gray-500">게시판</button>
 </nav>
 
-<main class="max-w-4xl mx-auto p-4 mt-4 space-y-6">
+<main class="max-w-4xl mx-auto p-4">
 
-<!-- 알림 -->
-<section class="card border-l-8 border-indigo-500">
-    <h2 class="title">📌 알림</h2>
+<!-- 일정 -->
+<div id="content-exam">
 
-    <div class="grid md:grid-cols-3 gap-4">
-        <div class="box bg-indigo-50">
-            <p class="label text-indigo-400">중간고사</p>
-            <p id="exam-dday" class="big text-indigo-600">계산중</p>
-        </div>
+<section class="card border-l-4 border-indigo-500">
+<h2 class="title">📌 알림</h2>
 
-        <div class="box bg-red-50 md:col-span-2">
-            <p class="label text-red-400">🔥 수행평가</p>
-            <p id="nearest-assessment" class="text-red-600 font-bold">로딩중</p>
-        </div>
-    </div>
+<p id="exam-dday"></p>
+<p id="nearest-assessment"></p>
+
 </section>
 
-<!-- 공지 + 경기 -->
-<section class="grid md:grid-cols-2 gap-4">
-    <div class="card border-t-4 border-orange-400">
-        <h2 class="title"><i class="fas fa-bullhorn mr-2"></i>공지</h2>
-        <div id="notice-content"></div>
-    </div>
-
-    <div class="card border-t-4 border-cyan-500">
-        <h2 class="title"><i class="fas fa-futbol mr-2"></i>경기 일정</h2>
-        <div id="pl-content"></div>
-    </div>
-</section>
-
-<!-- 수행평가 -->
 <section class="card">
-    <h2 class="section-title">수행평가</h2>
-
-    <table class="w-full text-sm">
-        <thead class="bg-gray-50 text-gray-500">
-            <tr>
-                <th class="p-3">과목</th>
-                <th class="p-3">내용</th>
-                <th class="p-3">기한</th>
-            </tr>
-        </thead>
-        <tbody id="assessment-list"></tbody>
-    </table>
+<h2 class="title">공지</h2>
+<div id="notice-content"></div>
 </section>
+
+<section class="card">
+<h2 class="title">수행평가</h2>
+<table class="w-full">
+<tbody id="assessment-list"></tbody>
+</table>
+</section>
+
+<section class="card">
+<h2 class="title">시험 범위</h2>
+<div id="range-cards"></div>
+</section>
+
+</div>
 
 <!-- 게시판 -->
-<section id="content-board" class="card hidden">
-    <h2 class="section-title">💬 게시판</h2>
+<div id="content-board" class="hidden">
 
-    <textarea id="post-text" class="input" placeholder="작성..."></textarea>
-    <button id="addPostBtn" class="btn-primary">작성</button>
+<textarea id="post-text" class="input"></textarea>
+<button id="addPostBtn" class="btn-primary">작성</button>
 
-    <div id="post-list" class="space-y-3 mt-4"></div>
-</section>
+<div id="post-list"></div>
+
+</div>
 
 </main>
 

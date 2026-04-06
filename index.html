@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>우리반 게시판</title>
+    <title>1-4반 시험 범위 공지</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDKbxqZBW6NovbiJAFJGyZIQZfYIxGvbN8",
@@ -24,67 +24,63 @@
         const db = getFirestore();
         const provider = new GoogleAuthProvider();
 
-        onAuthStateChanged(auth, (user) => {
-            const loginBtn = document.getElementById('loginBtn');
-            const writeSection = document.getElementById('writeSection');
-            if (user) {
-                loginBtn.innerText = `${user.displayName} (로그아웃)`;
-                writeSection.classList.remove('hidden');
-                loginBtn.onclick = () => signOut(auth);
+        // 실시간으로 시험 범위 데이터 가져오기
+        const examDoc = doc(db, "info", "examRange");
+        onSnapshot(examDoc, (doc) => {
+            if (doc.exists()) {
+                document.getElementById('examDisplay').innerText = doc.data().content;
+                document.getElementById('editor').value = doc.data().content;
             } else {
-                loginBtn.innerText = "구글 로그인";
-                writeSection.classList.add('hidden');
-                loginBtn.onclick = () => signInWithPopup(auth, provider);
+                document.getElementById('examDisplay').innerText = "아직 등록된 범위가 없습니다.";
             }
         });
 
-        window.savePost = async () => {
-            const content = document.getElementById('postContent').value;
-            if (!content) return alert("내용을 입력하세요!");
+        // 로그인 상태에 따라 수정 UI 보여주기
+        onAuthStateChanged(auth, (user) => {
+            const adminSection = document.getElementById('adminSection');
+            const loginBtn = document.getElementById('loginBtn');
+            if (user) {
+                adminSection.classList.remove('hidden');
+                loginBtn.classList.add('hidden');
+            } else {
+                adminSection.classList.add('hidden');
+                loginBtn.classList.remove('hidden');
+            }
+        });
 
+        window.login = () => signInWithPopup(auth, provider);
+
+        window.updateRange = async () => {
+            const newContent = document.getElementById('editor').value;
             try {
-                await addDoc(collection(db, "posts"), {
-                    text: content,
-                    createdAt: new Date(),
-                    user: auth.currentUser.displayName
+                await setDoc(examDoc, { 
+                    content: newContent,
+                    lastUpdated: new Date(),
+                    updatedBy: auth.currentUser.displayName 
                 });
-                document.getElementById('postContent').value = "";
+                alert("시험 범위가 업데이트 되었습니다!");
             } catch (e) {
-                alert("오류 발생: " + e.message);
+                alert("수정 권한이 없습니다.");
             }
         };
-
-        const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
-        onSnapshot(q, (snapshot) => {
-            const list = document.getElementById('postList');
-            list.innerHTML = "";
-            snapshot.forEach((doc) => {
-                const post = doc.data();
-                list.innerHTML += `
-                    <div class="bg-white p-5 rounded-2xl shadow-sm mb-4 border border-gray-100">
-                        <div class="flex justify-between mb-2">
-                            <span class="font-bold text-indigo-600 text-sm">${post.user}</span>
-                        </div>
-                        <p class="text-gray-800">${post.text}</p>
-                    </div>
-                `;
-            });
-        });
     </script>
 </head>
-<body class="bg-slate-50">
-    <nav class="bg-white border-b p-4 sticky top-0 z-10 shadow-sm">
-        <div class="max-w-xl mx-auto flex justify-between items-center">
-            <h1 class="font-black text-indigo-600 text-xl">BYHS 1-4 📌</h1>
-            <button id="loginBtn" class="text-sm font-bold bg-indigo-50 px-4 py-2 rounded-lg text-indigo-600"></button>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4">
+    <div class="max-w-md w-full bg-white rounded-3xl shadow-xl p-8">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-black text-indigo-600">📝 시험 범위 공지</h1>
+            <button id="loginBtn" onclick="login()" class="text-xs text-gray-400 hover:text-indigo-600">관리자 로그인</button>
         </div>
-    </nav>
-    <main class="max-w-xl mx-auto p-4">
-        <div id="writeSection" class="hidden mb-8">
-            <textarea id="postContent" class="w-full p-4 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none resize-none" rows="3" placeholder="소식을 전해보세요..."></textarea>
-            <button onclick="savePost()" class="w-full mt-2 bg-indigo-600 text-white font-bold py-3 rounded-2xl hover:bg-indigo-700 transition">게시물 올리기</button>
+
+        <div class="bg-indigo-50 rounded-2xl p-6 mb-6">
+            <p id="examDisplay" class="text-gray-800 whitespace-pre-wrap leading-relaxed font-medium text-lg">로딩 중...</p>
         </div>
-        <div id="postList"></div>
-    </main>
+
+        <div id="adminSection" class="hidden border-t pt-6">
+            <p class="text-sm font-bold text-gray-500 mb-2">범위 수정하기</p>
+            <textarea id="editor" class="w-full p-4 border rounded-xl mb-3 focus:ring-2 focus:ring-indigo-500 outline-none" rows="5"></textarea>
+            <button onclick="updateRange()" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition">내용 저장하기</button>
+        </div>
+    </div>
 </body>
 </html>

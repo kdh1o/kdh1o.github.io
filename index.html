@@ -3,29 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BYHS 1-4 ALL-IN-ONE</title>
-    <script src="script/JohnsonLib.js"></script>
+    <title>BYHS 1-4</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="bg-slate-50">
 
-    <header class="w-full text-white py-8 px-6 relative z-30 shadow-2xl">
+    <header class="w-full bg-slate-900 text-white py-8 px-6 shadow-2xl">
         <div class="max-w-4xl mx-auto flex justify-between items-end">
             <div>
-                <p class="text-indigo-300 text-sm font-bold mb-1 tracking-widest">부여고등학교 1학년 4반</p>
-                <h1 class="text-3xl font-extrabold tracking-tighter">📢 BYHS 1-4</h1>
+                <p class="text-indigo-400 text-xs font-bold mb-1 tracking-widest uppercase">Buyeo High School 1-4</p>
+                <h1 class="text-3xl font-black tracking-tighter">📢 BYHS 1-4</h1>
             </div>
-            <button id="loginBtn" class="text-[10px] opacity-40 hover:opacity-100 border border-white/30 px-2 py-1 rounded transition uppercase">Admin</button>
+            <button id="loginBtn" class="text-[10px] opacity-40 hover:opacity-100 border border-white/30 px-2 py-1 rounded uppercase">Admin</button>
         </div>
     </header>
 
-    <nav class="w-full bg-white/80 backdrop-blur-md flex border-b sticky top-0 z-20 shadow-sm">
-        <div class="max-w-4xl mx-auto w-full flex">
-            <button id="tab-exam" class="flex-1 py-4 font-bold tab-active transition-all">🗓️ 학업 일정</button>
-            <button id="tab-board" class="flex-1 py-4 font-bold text-gray-400 transition-all">💬 게시판</button>
+    <nav class="w-full bg-white/90 backdrop-blur-md flex border-b sticky top-0 z-50 shadow-sm overflow-x-auto">
+        <div class="max-w-4xl mx-auto w-full flex min-w-[420px]">
+            <button id="tab-exam" class="flex-1 py-4 font-bold tab-active transition-all text-[13px]">🗓️ 학업 일정</button>
+            <button id="tab-pl" class="flex-1 py-4 font-bold text-gray-400 transition-all text-[13px] border-x border-gray-50">🏆 부리미어리그</button>
+            <button id="tab-meal" class="flex-1 py-4 font-bold text-gray-400 transition-all text-[13px] border-r border-gray-50">🍱 급식</button>
+            <button id="tab-board" class="flex-1 py-4 font-bold text-gray-400 transition-all text-[13px]">💬 게시판</button>
         </div>
     </nav>
 
@@ -33,76 +34,66 @@
         <div id="content-exam">
             <section class="grid grid-cols-2 gap-3 mb-4">
                 <div class="card !mb-0 flex flex-col justify-center items-center py-6 border-b-4 border-indigo-500">
-                    <p class="text-xs text-gray-400 font-bold mb-1">중간고사</p>
+                    <p class="text-xs text-gray-400 font-bold mb-1">시험 디데이</p>
                     <p id="exam-dday" class="text-3xl font-black text-indigo-600">--</p>
                 </div>
                 <div class="card !mb-0 flex flex-col justify-center items-center py-6 border-b-4 border-red-500">
-                    <p class="text-xs text-gray-400 font-bold mb-1">🔥 가장 빠른 수행</p>
-                    <div id="nearest-assessment" class="flex flex-col items-center">
-                        <p class="text-red-600 font-black text-2xl">--</p>
+                    <p class="text-xs text-gray-400 font-bold mb-1">가장 빠른 수행</p>
+                    <div id="nearest-assessment" class="flex flex-col items-center"><p class="text-red-600 font-black text-2xl">--</p></div>
+                </div>
+            </section>
+            <section class="card border-t-4 border-yellow-400">
+                <h2 class="title"> 공지</h2>
+                <div id="notice-content" class="text-sm text-gray-600 mt-2 leading-relaxed whitespace-pre-wrap"></div>
+            </section>
+            <section class="card"><h2 class="title mb-4">🗓️ 수행평가 리스트</h2><div class="overflow-hidden rounded-xl border border-gray-100"><table class="w-full text-left text-sm"><thead class="bg-gray-50 text-gray-400 font-bold"><tr><th class="p-4">과목</th><th class="p-4">내용</th><th class="p-4 text-right">마감</th></tr></thead><tbody id="assessment-list" class="divide-y divide-gray-50"></tbody></table></div></section>
+            <section class="card"><h2 class="title mb-4">📖 시험 범위</h2><div id="range-cards" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div></section>
+        </div>
+
+        <div id="content-pl" class="hidden">
+            <section class="card !bg-slate-900 border-none shadow-indigo-500/20 shadow-xl text-white p-8">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-2xl font-black italic tracking-tighter text-cyan-400 underline decoration-cyan-500/30">BOORIMIER LEAGUE</h2>
+                    <i class="fas fa-trophy text-yellow-400 text-2xl animate-bounce"></i>
+                </div>
+                <div id="pl-main-content" class="space-y-6 min-h-[200px] flex items-center justify-center text-center"></div>
+                <div class="mt-10 pt-6 border-t border-slate-800 text-[10px] text-slate-500 flex justify-between font-bold"><span>OFFICIAL 1-4 LEAGUE</span><span>EST. 2026</span></div>
+            </section>
+        </div>
+
+        <div id="content-meal" class="hidden">
+            <section class="card border-t-4 border-emerald-400">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                    <h2 class="title text-gray-700 text-xl"><i class="fas fa-utensils text-emerald-500"></i> 오늘의 식단표</h2>
+                    <div class="flex bg-gray-100 p-1.5 rounded-2xl text-[13px] font-black">
+                        <button id="btn-meal-1" class="px-5 py-2.5 rounded-xl transition-all mr-1">조식</button>
+                        <button id="btn-meal-2" class="px-5 py-2.5 rounded-xl transition-all mr-1">중식</button>
+                        <button id="btn-meal-3" class="px-5 py-2.5 rounded-xl transition-all">석식</button>
                     </div>
                 </div>
-            </section>
-
-            <section class="card border-t-4 border-emerald-400">
-                <h2 class="title text-gray-700">
-                    <i class="fas fa-utensils text-emerald-500"></i> 오늘의 급식
-                </h2>
-                <div id="meal-content" class="mt-3">
-                    <p class="text-sm text-gray-400 animate-pulse text-center py-4 font-bold italic">식단을 불러오는 중...</p>
-                </div>
-            </section>
-
-            <section class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div class="card border-t-4 border-yellow-400">
-                    <h2 class="title"><i class="fas fa-bolt text-yellow-500"></i> 오늘의 공지</h2>
-                    <div id="notice-content" class="text-sm text-gray-600 whitespace-pre-wrap mt-2 leading-relaxed"></div>
-                </div>
-                <div class="card !bg-slate-900 border-none shadow-indigo-500/20 shadow-lg">
-                    <h2 class="title !text-white"><i class="fas fa-trophy text-cyan-400"></i> 부리미어 리그</h2>
-                    <div id="pl-content" class="mt-3"></div>
-                </div>
-            </section>
-
-            <section class="card">
-                <h2 class="title mb-4"><i class="fas fa-tasks text-indigo-500"></i> 수행평가 일정</h2>
-                <div class="overflow-hidden rounded-xl border border-gray-100">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-gray-50 text-gray-400 font-bold">
-                            <tr><th class="p-4">과목</th><th class="p-4">내용</th><th class="p-4 text-right">마감일</th></tr>
-                        </thead>
-                        <tbody id="assessment-list" class="divide-y divide-gray-50"></tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section class="card">
-                <h2 class="title mb-4"><i class="fas fa-book-open text-green-500"></i> 시험 범위</h2>
-                <div id="range-cards" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                <div id="meal-display-container" class="min-h-[250px] flex items-center justify-center transition-all duration-300"></div>
+                <p id="meal-update-time" class="text-center text-[10px] text-gray-300 mt-8 font-bold italic tracking-widest"></p>
             </section>
         </div>
 
         <div id="content-board" class="hidden">
             <section class="card">
                 <h2 class="title mb-4">💬 게시판</h2>
-                <div id="post-input-section" class="hidden mb-6">
-                    <textarea id="post-text" class="input" rows="3" placeholder="내용을 입력하세요."></textarea>
-                    <button id="addPostBtn" class="btn-primary mt-3 shadow-lg font-bold">글 남기기</button>
-                </div>
-                <div id="post-login-msg" class="text-center py-10 text-gray-400 text-sm border-2 border-dashed border-gray-200 rounded-2xl mb-6">로그인이 필요합니다.</div>
+                <div id="post-input-section" class="hidden mb-6"><textarea id="post-text" class="input mb-3" rows="3" placeholder="기분 좋은 한마디를 남겨주세요!"></textarea><button id="addPostBtn" class="btn-primary font-bold shadow-lg">작성하기</button></div>
+                <div id="post-login-msg" class="text-center py-10 text-gray-400 text-sm border-2 border-dashed border-gray-200 rounded-2xl mb-6">글을 쓰려면 로그인이 필요합니다.</div>
                 <div id="post-list" class="space-y-4"></div>
             </section>
         </div>
 
         <section id="admin-panel" class="hidden mt-10 p-8 bg-slate-900 rounded-[2.5rem] text-white shadow-2xl">
-            <h2 class="text-xl font-bold mb-6 text-cyan-400 italic italic">Admin Dashboard</h2>
+            <h2 class="text-xl font-black mb-6 text-cyan-400 italic">ADMIN DASHBOARD</h2>
             <div class="space-y-4 text-sm">
                 <div><label class="label">시험 날짜</label><input type="date" id="input-date" class="admin-input"></div>
                 <div><label class="label">수행평가 (과목|내용|MM.DD)</label><textarea id="input-assessments" class="admin-input h-24"></textarea></div>
                 <div><label class="label">시험 범위 (과목:내용)</label><textarea id="input-ranges" class="admin-input h-24"></textarea></div>
                 <div><label class="label">공지사항</label><textarea id="input-notice" class="admin-input h-24"></textarea></div>
-                <div><label class="label">부리미어 일정</label><textarea id="input-pl" class="admin-input h-24"></textarea></div>
-                <button id="saveBtn" class="w-full bg-cyan-500 text-slate-900 font-black py-4 rounded-2xl mt-4 uppercase">Update Server</button>
+                <div><label class="label">부리미어 리그 일정</label><textarea id="input-pl" class="admin-input h-24"></textarea></div>
+                <button id="saveBtn" class="w-full bg-cyan-500 text-slate-900 font-black py-4 rounded-2xl mt-4 uppercase hover:bg-cyan-400 transition-all">Update Server</button>
             </div>
         </section>
     </main>

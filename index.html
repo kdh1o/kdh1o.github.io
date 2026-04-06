@@ -6,31 +6,24 @@
     <title>1-4반 통합 게시판</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .tab-active { border-bottom: 4px solid #4f46e5; color: #4f46e5; font-weight: bold; }
-        /* 링크 스타일 */
-        .auto-link { color: #2563eb; text-decoration: underline; font-weight: 500; }
-        .auto-link:hover { color: #1e40af; }
-    </style>
-</head>
+    <link rel="stylesheet" href="style.css"> </head>
 <body class="bg-gray-50 text-gray-800 font-sans">
 
     <header class="bg-indigo-600 text-white py-6 px-4 shadow-lg relative">
         <div class="max-w-4xl mx-auto text-center">
             <h1 class="text-2xl font-bold">📢 1-4반 알림센터</h1>
-            <button id="loginBtn" class="absolute top-4 right-4 text-xs opacity-60 hover:opacity-100 border border-white px-2 py-1 rounded">관리자 로그인</button>
+            <button id="loginBtn" class="absolute top-4 right-4 text-xs opacity-60 hover:opacity-100 border border-white px-2 py-1 rounded transition">관리자 로그인</button>
         </div>
     </header>
 
     <nav class="bg-white shadow-sm sticky top-0 z-20">
         <div class="max-w-4xl mx-auto flex">
-            <button onclick="switchTab('exam')" id="tab-exam" class="flex-1 py-4 text-center tab-active transition">🗓️ 시험 & 수행</button>
-            <button onclick="switchTab('board')" id="tab-board" class="flex-1 py-4 text-center text-gray-500 transition">💬 자유 게시판</button>
+            <button id="tab-exam" class="flex-1 py-4 text-center tab-active transition">🗓️ 시험 & 수행</button>
+            <button id="tab-board" class="flex-1 py-4 text-center text-gray-500 transition">💬 자유 게시판</button>
         </div>
     </nav>
 
     <main class="max-w-4xl mx-auto p-4 mt-4">
-        
         <div id="content-exam">
             <section class="bg-white rounded-2xl shadow-md p-6 mb-6 border-l-8 border-indigo-500">
                 <h2 class="text-lg font-bold mb-4 text-gray-700">📌 주요 알림</h2>
@@ -41,11 +34,10 @@
                     </div>
                     <div class="bg-red-50 p-4 rounded-xl md:col-span-2">
                         <p class="text-xs text-red-400 font-bold mb-1">🔥 가장 가까운 수행평가</p>
-                        <p id="nearest-assessment" class="text-lg font-bold text-red-600 italic font-sans">로딩 중...</p>
+                        <p id="nearest-assessment" class="text-lg font-bold text-red-600 italic">로딩 중...</p>
                     </div>
                 </div>
             </section>
-
             <section class="mb-8">
                 <h2 class="text-xl font-bold mb-4 flex items-center"><span class="bg-yellow-400 w-1.5 h-6 mr-2 rounded-full"></span>수행평가 일정</h2>
                 <div class="overflow-x-auto rounded-xl shadow-sm border bg-white">
@@ -53,11 +45,10 @@
                         <thead class="bg-gray-50 text-gray-500 text-sm">
                             <tr><th class="p-4">과목</th><th class="p-4">내용</th><th class="p-4">마감</th></tr>
                         </thead>
-                        <tbody id="assessment-list" class="divide-y text-sm"></tbody>
+                        <tbody id="assessment-list" class="divide-y text-sm text-gray-600"></tbody>
                     </table>
                 </div>
             </section>
-
             <section>
                 <h2 class="text-xl font-bold mb-4 flex items-center"><span class="bg-green-400 w-1.5 h-6 mr-2 rounded-full"></span>시험 범위</h2>
                 <div id="range-cards" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
@@ -68,12 +59,10 @@
             <section class="bg-white rounded-2xl shadow-md p-6">
                 <h2 class="text-xl font-bold mb-4">💬 우리반 한마디</h2>
                 <div id="post-input-section" class="hidden mb-6">
-                    <textarea id="post-text" class="w-full p-4 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" rows="2" placeholder="친구들에게 남길 말을 적어보세요!"></textarea>
-                    <button onclick="addPost()" class="w-full mt-2 bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700">게시하기</button>
+                    <textarea id="post-text" class="w-full p-4 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition" rows="2" placeholder="친구들에게 남길 말을 적어보세요!"></textarea>
+                    <button id="addPostBtn" class="w-full mt-2 bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition">게시하기</button>
                 </div>
-                <div id="post-login-msg" class="text-center py-4 text-gray-400 text-sm border-2 border-dashed rounded-xl mb-6">
-                    로그인하면 글을 남길 수 있습니다.
-                </div>
+                <div id="post-login-msg" class="text-center py-4 text-gray-400 text-sm border-2 border-dashed rounded-xl mb-6">로그인하면 글을 남길 수 있습니다.</div>
                 <div id="post-list" class="space-y-4"></div>
             </section>
         </div>
@@ -81,135 +70,14 @@
         <section id="admin-panel" class="hidden mt-10 p-6 bg-gray-900 rounded-3xl text-white shadow-2xl">
             <h2 class="text-lg font-bold mb-4 text-yellow-400"><i class="fas fa-tools mr-2"></i>관리자 데이터 수정</h2>
             <div class="grid grid-cols-1 gap-4 text-sm">
-                <div>
-                    <label class="text-gray-400 block mb-1">시험 날짜</label>
-                    <input type="date" id="input-date" class="w-full bg-gray-800 p-2 rounded border-none text-white">
-                </div>
-                <div>
-                    <label class="text-gray-400 block mb-1">수행평가 (과목|내용|날짜)</label>
-                    <textarea id="input-assessments" class="w-full bg-gray-800 p-2 rounded h-24 text-white" placeholder="수학|포트폴리오|04.15"></textarea>
-                </div>
-                <div>
-                    <label class="text-gray-400 block mb-1">시험 범위 (과목:상세내용)</label>
-                    <textarea id="input-ranges" class="w-full bg-gray-800 p-2 rounded h-24 text-white" placeholder="과학:1단원~3단원"></textarea>
-                </div>
-                <button onclick="saveData()" class="bg-yellow-500 text-black font-black py-3 rounded-xl hover:bg-yellow-400 transition">서버에 저장하기</button>
+                <input type="date" id="input-date" class="w-full bg-gray-800 p-2 rounded text-white border-none">
+                <textarea id="input-assessments" class="w-full bg-gray-800 p-2 rounded h-24 text-white" placeholder="수학|포트폴리오|04.15"></textarea>
+                <textarea id="input-ranges" class="w-full bg-gray-800 p-2 rounded h-24 text-white" placeholder="과학:1단원~3단원"></textarea>
+                <button id="saveBtn" class="bg-yellow-500 text-black font-black py-3 rounded-xl hover:bg-yellow-400 transition">서버에 저장하기</button>
             </div>
         </section>
-
     </main>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, addDoc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDKbxqZBW6NovbiJAFJGyZIQZfYIxGvbN8",
-            authDomain: "byhs1-4.firebaseapp.com",
-            projectId: "byhs1-4",
-            storageBucket: "byhs1-4.firebasestorage.app",
-            messagingSenderId: "734684323543",
-            appId: "1:734684323543:web:fb7bd8c10e6cfcacabda92"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth();
-        const db = getFirestore();
-        const provider = new GoogleAuthProvider();
-
-        const ADMIN_EMAIL = "kr.craft1016@gmail.com"; 
-        const dataDoc = doc(db, "classData", "main");
-
-        // 하이퍼링크 변환 함수
-        const linkify = (text) => {
-            const urlPattern = /(https?:\/\/[^\s]+)/g;
-            return text.replace(urlPattern, '<a href="$1" target="_blank" class="auto-link">$1</a>');
-        };
-
-        window.switchTab = (tab) => {
-            document.getElementById('content-exam').classList.toggle('hidden', tab !== 'exam');
-            document.getElementById('content-board').classList.toggle('hidden', tab !== 'board');
-            document.getElementById('tab-exam').className = tab === 'exam' ? 'flex-1 py-4 text-center tab-active' : 'flex-1 py-4 text-center text-gray-500';
-            document.getElementById('tab-board').className = tab === 'board' ? 'flex-1 py-4 text-center tab-active' : 'flex-1 py-4 text-center text-gray-500';
-        };
-
-        onSnapshot(dataDoc, (snap) => {
-            if (snap.exists()) {
-                const data = snap.data();
-                const diff = new Date(data.examDate) - new Date();
-                const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-                document.getElementById('exam-dday').innerText = days > 0 ? `D-${days}` : (days === 0 ? "D-Day" : "종료");
-
-                const listBody = document.getElementById('assessment-list');
-                listBody.innerHTML = "";
-                const rows = data.rawAssessments.split('\n').filter(r => r.includes('|'));
-                
-                if(rows.length > 0) {
-                    const firstRow = rows[0].split('|');
-                    document.getElementById('nearest-assessment').innerHTML = `${firstRow[0]} - ${linkify(firstRow[1])} (${firstRow[2]})`;
-                    rows.forEach(row => {
-                        const [sub, con, dat] = row.split('|');
-                        listBody.innerHTML += `<tr><td class="p-4 font-bold text-indigo-600">${sub}</td><td class="p-4 text-gray-500">${linkify(con)}</td><td class="p-4 text-xs font-bold text-blue-500">${dat}</td></tr>`;
-                    });
-                }
-
-                const cardCont = document.getElementById('range-cards');
-                cardCont.innerHTML = "";
-                data.rawRanges.split('\n').forEach(line => {
-                    if(line.includes(':')) {
-                        const [t, d] = line.split(':');
-                        cardCont.innerHTML += `<div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm"><h3 class="font-bold text-green-700 mb-1">${t}</h3><p class="text-xs text-gray-500">${linkify(d)}</p></div>`;
-                    }
-                });
-
-                document.getElementById('input-date').value = data.examDate;
-                document.getElementById('input-assessments').value = data.rawAssessments;
-                document.getElementById('input-ranges').value = data.rawRanges;
-            }
-        });
-
-        const q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(30));
-        onSnapshot(q, (snap) => {
-            const list = document.getElementById('post-list');
-            list.innerHTML = "";
-            snap.forEach(doc => {
-                const p = doc.data();
-                list.innerHTML += `<div class="bg-gray-50 p-4 rounded-xl border border-gray-100"><div class="flex justify-between text-xs mb-1"><span class="font-bold text-indigo-600">${p.user}</span><span class="text-gray-400">${p.createdAt?.toDate().toLocaleString().slice(5, 16)}</span></div><p class="text-sm text-gray-700">${linkify(p.text)}</p></div>`;
-            });
-        });
-
-        window.addPost = async () => {
-            const text = document.getElementById('post-text').value;
-            if(!text.trim()) return;
-            try {
-                await addDoc(collection(db, "posts"), { text, user: auth.currentUser.displayName, createdAt: new Date() });
-                document.getElementById('post-text').value = "";
-            } catch(e) { alert("로그인이 필요합니다."); }
-        };
-
-        onAuthStateChanged(auth, (user) => {
-            const isAdmin = user && user.email === ADMIN_EMAIL;
-            document.getElementById('admin-panel').classList.toggle('hidden', !isAdmin);
-            document.getElementById('post-input-section').classList.toggle('hidden', !user);
-            document.getElementById('post-login-msg').classList.toggle('hidden', !!user);
-            document.getElementById('loginBtn').innerText = user ? "로그아웃" : "관리자 로그인";
-            document.getElementById('loginBtn').onclick = () => user ? auth.signOut() : signInWithPopup(auth, provider);
-        });
-
-        window.saveData = async () => {
-            if(!confirm("서버에 저장할까요?")) return;
-            try {
-                await setDoc(dataDoc, {
-                    examDate: document.getElementById('input-date').value,
-                    rawAssessments: document.getElementById('input-assessments').value,
-                    rawRanges: document.getElementById('input-ranges').value,
-                    lastUpdated: new Date().toLocaleString(),
-                    updatedBy: auth.currentUser.displayName
-                });
-                alert("저장 완료!");
-            } catch(e) { alert("권한이 없습니다."); }
-        };
-    </script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>

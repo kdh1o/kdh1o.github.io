@@ -159,24 +159,40 @@ onSnapshot(dataDoc, (snap) => {
 // --- [D] 게시판 로직 ---
 const addPostBtn = document.getElementById('addPostBtn');
 const postText = document.getElementById('post-text');
-onSnapshot(query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(20)), (snap) => {
+// 수정 전: orderBy가 있으면 색인이 없어서 안 보일 수 있음
+// 수정 후: 일단 정렬을 빼고 글이 올라오는지 확인합니다.
+
+onSnapshot(query(collection(db, "posts"), limit(20)), (snap) => {
     const postList = document.getElementById('post-list');
+    if (!postList) return;
+    
     postList.innerHTML = "";
+    if (snap.empty) {
+        postList.innerHTML = "<p class='text-center text-gray-400 py-10'>첫 게시글을 남겨보세요!</p>";
+        return;
+    }
+
     snap.forEach(docSnap => {
         const p = docSnap.data();
         const div = document.createElement('div');
-        div.className = "card !p-5 bg-white border border-gray-100 animate-fadeIn relative";
-        let delBtn = (auth.currentUser?.email === ADMIN_EMAIL) ? `<button onclick="window.deletePost('${docSnap.id}')" class="text-red-400 text-[10px] ml-2">삭제</button>` : "";
-        div.innerHTML = `<div class="flex justify-between text-[11px] mb-2 text-gray-400"><div><span class="font-black text-indigo-500 mr-2">${p.user}</span>${delBtn}</div><span>${p.createdAt?.toDate().toLocaleString().slice(5, 16) || "방금 전"}</span></div><p class="text-sm text-slate-700 whitespace-pre-wrap">${linkify(p.text)}</p>`;
+        div.className = "card !p-5 bg-white border border-gray-100 animate-fadeIn relative mb-4";
+        
+        // 시간 데이터가 없을 경우를 대비한 방어 코드
+        const timeDisplay = p.createdAt ? p.createdAt.toDate().toLocaleString().slice(5, 16) : "방금 전";
+        
+        let isAdmin = auth.currentUser && ADMIN_EMAILS.includes(auth.currentUser.email);
+        let delBtn = isAdmin ? `<button onclick="window.deletePost('${docSnap.id}')" class="text-red-400 text-[10px] ml-2">삭제</button>` : "";
+        
+        div.innerHTML = `
+            <div class="flex justify-between text-[11px] mb-2 text-gray-400">
+                <div><span class="font-black text-indigo-500 mr-2">${p.user}</span>${delBtn}</div>
+                <span>${timeDisplay}</span>
+            </div>
+            <p class="text-sm text-slate-700 whitespace-pre-wrap">${p.text}</p>
+        `;
         postList.appendChild(div);
     });
 });
-window.deletePost = async (id) => { if(confirm("삭제?")) await deleteDoc(doc(db, "posts", id)); };
-addPostBtn.onclick = async () => {
-    if (!postText.value.trim()) return;
-    await addDoc(collection(db, "posts"), { user: auth.currentUser.displayName || "익명", text: postText.value, createdAt: serverTimestamp() });
-    postText.value = "";
-};
 
 // --- [E] 급식 로직 ---
 async function getMeal() {

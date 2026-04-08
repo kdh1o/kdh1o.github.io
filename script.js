@@ -254,3 +254,58 @@ document.getElementById('saveBtn').onclick = async () => {
 
 // 2. 정의한 함수를 전역(window) 객체에 즉시 할당합니다.
 window.deletePost = deletePostHandler;
+
+// --- [G] 게시물 추가 및 삭제 함수 (window 등록) ---
+
+// 1. 게시물 추가 함수
+addPostBtn.onclick = async () => {
+    const text = postText.value.trim();
+    if (!text) return;
+    if (!auth.currentUser) return alert("로그인이 필요합니다.");
+
+    try {
+        await addDoc(collection(db, "posts"), {
+            text: text,
+            user: auth.currentUser.displayName || "익명",
+            email: auth.currentUser.email,
+            createdAt: serverTimestamp()
+        });
+        postText.value = "";
+    } catch (e) {
+        alert("전송 실패: " + e.message);
+    }
+};
+
+// 2. 게시물 삭제 함수 정의 (이 부분이 빠져서 에러가 났던 겁니다!)
+const deletePostHandler = async (docId) => {
+    if (!auth.currentUser) {
+        alert("로그인이 필요합니다.");
+        return;
+    }
+
+    if (!confirm("정말 이 게시물을 삭제하시겠습니까?")) return;
+
+    try {
+        await deleteDoc(doc(db, "posts", docId));
+        alert("삭제되었습니다.");
+    } catch (error) {
+        console.error("삭제 중 에러 발생:", error);
+        alert("삭제 권한이 없거나 오류가 발생했습니다.");
+    }
+};
+
+// 3. 전역 객체에 함수 등록 (HTML onclick에서 인식 가능하게 함)
+window.deletePost = deletePostHandler;
+
+// --- [H] 서버 저장 버튼 ---
+document.getElementById('saveBtn').onclick = async () => {
+    await setDoc(dataDoc, {
+        examDate: document.getElementById('input-date').value,
+        rawAssessments: document.getElementById('input-assessments').value,
+        rawRanges: document.getElementById('input-ranges').value,
+        notice: document.getElementById('input-notice').value,
+        plSchedule: document.getElementById('input-pl').value,
+        plRank: document.getElementById('input-pl-rank').value
+    }, { merge: true });
+    alert("서버에 저장되었습니다!");
+};

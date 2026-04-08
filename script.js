@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, deleteDoc, getDoc, setDoc, onSnapshot, collection, addDoc, query, orderBy, limit, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, addDoc, query, orderBy, limit, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // 1. 새로운 파이어베이스 설정 적용
 const firebaseConfig = {
@@ -250,25 +250,6 @@ document.getElementById('saveBtn').onclick = async () => {
         plRank: document.getElementById('input-pl-rank').value
     }, { merge: true });
     alert("서버에 저장되었습니다!");
-};
-
-// 1. 함수를 먼저 정의합니다.
-const deletePostHandler = async (docId) => {
-    if (!auth.currentUser) {
-        alert("로그인이 필요합니다.");
-        return;
-    }
-
-    if (!confirm("정말 이 게시물을 삭제하시겠습니까?")) return;
-
-    try {
-        // 상단 import에서 가져온 doc, db, deleteDoc을 사용합니다.
-        await deleteDoc(doc(db, "posts", docId));
-        alert("삭제되었습니다.");
-    } catch (error) {
-        console.error("삭제 중 에러 발생:", error);
-        alert("삭제 권한이 없거나 오류가 발생했습니다.");
-    }
 };
 
 // 2. 정의한 함수를 전역(window) 객체에 즉시 할당합니다.

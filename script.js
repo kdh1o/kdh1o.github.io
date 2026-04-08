@@ -2,22 +2,69 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, addDoc, query, orderBy, limit, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// 1. 파이어베이스 설정
+// 1. 새로운 파이어베이스 설정 적용
 const firebaseConfig = {
-    apiKey: "AIzaSyDKbxqZBW6NovbiJAFJGyZIQZfYIxGvbN8",
-    authDomain: "byhs1-4.firebaseapp.com",
-    projectId: "byhs1-4",
-    storageBucket: "byhs1-4.firebasestorage.app",
-    messagingSenderId: "734684323543",
-    appId: "1:734684323543:web:fb7bd8c10e6cfcacabda92"
+  apiKey: "AIzaSyBiUbjpxKMTr96tSoBwwgFn8-5NTCLEnJ8",
+  authDomain: "byhs1-4-de284.firebaseapp.com",
+  projectId: "byhs1-4-de284",
+  storageBucket: "byhs1-4-de284.firebasestorage.app",
+  messagingSenderId: "732735890321",
+  appId: "1:732735890321:web:230c9225b7dbd1f22f7030"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getFirestore();
 const provider = new GoogleAuthProvider();
-const ADMIN_EMAIL = "kr.craft1016@gmail.com"; 
+
+// 2. 관리자 이메일을 목록(배열)으로 관리
+const ADMIN_EMAILS = [
+    "kr.craft1016@gmail.com", 
+    "26bh1401@gmail.com" // 여기에 두 번째 관리자 이메일을 넣으세요!
+];
+
 const dataDoc = doc(db, "classData", "main");
+
+// --- [로그인 상태 감지 부분 수정] ---
+onAuthStateChanged(auth, async (user) => {
+    const adminPanel = document.getElementById('admin-panel');
+    const postInput = document.getElementById('post-input-section');
+    const postMsg = document.getElementById('post-login-msg');
+    const loginBtn = document.getElementById('loginBtn');
+    
+    if (user) {
+        loginBtn.innerText = "LOGOUT";
+        if (postInput) postInput.classList.remove('hidden');
+        if (postMsg) postMsg.classList.add('hidden');
+        
+        // 관리자 목록에 로그한 유저의 이메일이 있는지 확인
+        if (ADMIN_EMAILS.includes(user.email)) {
+            adminPanel.classList.remove('hidden');
+            const snap = await getDoc(dataDoc);
+            if (snap.exists()) {
+                const d = snap.data();
+                // 기존 데이터 불러오기 로직...
+                document.getElementById('input-date').value = d.examDate || "";
+                document.getElementById('input-assessments').value = d.rawAssessments || "";
+                document.getElementById('input-ranges').value = d.rawRanges || "";
+                document.getElementById('input-notice').value = d.notice || "";
+                document.getElementById('input-pl').value = d.plSchedule || "";
+                document.getElementById('input-pl-rank').value = d.plRank || "";
+            }
+        } else {
+            if (adminPanel) adminPanel.classList.add('hidden');
+        }
+    } else {
+        loginBtn.innerText = "ADMIN";
+        if (adminPanel) adminPanel.classList.add('hidden');
+        if (postInput) postInput.classList.add('hidden');
+        if (postMsg) postMsg.classList.remove('hidden');
+    }
+});
+
+// --- [게시판 삭제 버튼 권한 수정] ---
+// 게시판 목록 렌더링 부분에서 아래 조건을 사용하세요.
+// let isAdmin = auth.currentUser && ADMIN_EMAILS.includes(auth.currentUser.email);
 
 // 유틸리티 함수
 let mealStore = { 1: "정보 없음", 2: "정보 없음", 3: "정보 없음" };
@@ -61,37 +108,6 @@ loginBtn.onclick = async () => {
         catch (e) { alert("로그인 실패: " + e.message); }
     }
 };
-
-onAuthStateChanged(auth, async (user) => {
-    const adminPanel = document.getElementById('admin-panel');
-    const postInput = document.getElementById('post-input-section');
-    const postMsg = document.getElementById('post-login-msg');
-    
-    if (user) {
-        loginBtn.innerText = "LOGOUT";
-        if (postInput) postInput.classList.remove('hidden');
-        if (postMsg) postMsg.classList.add('hidden');
-        
-        if (user.email === ADMIN_EMAIL) {
-            adminPanel.classList.remove('hidden');
-            const snap = await getDoc(dataDoc);
-            if (snap.exists()) {
-                const d = snap.data();
-                document.getElementById('input-date').value = d.examDate || "";
-                document.getElementById('input-assessments').value = d.rawAssessments || "";
-                document.getElementById('input-ranges').value = d.rawRanges || "";
-                document.getElementById('input-notice').value = d.notice || "";
-                document.getElementById('input-pl').value = d.plSchedule || "";
-                document.getElementById('input-pl-rank').value = d.plRank || "";
-            }
-        }
-    } else {
-        loginBtn.innerText = "ADMIN";
-        if (adminPanel) adminPanel.classList.add('hidden');
-        if (postInput) postInput.classList.add('hidden');
-        if (postMsg) postMsg.classList.remove('hidden');
-    }
-});
 
 // --- [C] 실시간 데이터 렌더링 (PL 전적 포함) ---
 onSnapshot(dataDoc, (snap) => {
